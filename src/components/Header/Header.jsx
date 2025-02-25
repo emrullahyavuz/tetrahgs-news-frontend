@@ -49,7 +49,7 @@ const Header = () => {
         <Link to="/single-post" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
           Single Post
         </Link>
-        <Link to="/pages" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        <Link to="/about" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
           About
         </Link>
         <Link to="/contact" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">

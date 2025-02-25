@@ -6,6 +6,10 @@ import Footer from "./components/Footer/Footer";
 import RegisterPage from "./pages/Auth/RegisterPage";
 import LoginPage from "./pages/Auth/LoginPage";
 import "./App.css";
+import BlogDetailPage from "./pages/BlogDetailPage";
+import Page404 from "./pages/Page404";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
 
 function AppContent() {
   const location = useLocation();
@@ -18,6 +22,10 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="contact" element={<ContactPage />} />
+        <Route path="blog/:id" element={<BlogDetailPage />} />
+        <Route path="*" element={<Page404 />} />
       </Routes>
       <Footer />
     </>

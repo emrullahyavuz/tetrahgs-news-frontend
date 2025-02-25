@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import tetraHGS from '../../assets/tetrahgs.png';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
@@ -113,15 +114,15 @@ const Footer = () => {
         <div className="mx-auto flex flex-col px-4 md:px-0 md:flex-row items-center justify-between">
           <div className="text-gray-600 flex items-center space-x-2">
             <img
-              src="/images/Logo.svg"
-              width={48}
-              height={48}
-              alt="MetaBlog Logo"
+              src={tetraHGS}
+              width={80}
+              height={80}
+              alt="TetraBlog Logo"
               className="dark:brightness-0 dark:invert"
             />
             <div className="logo-info">
-              <strong className='dark:text-white'><span className='font-light'>Meta</span>Blog</strong>
-              <p>© JS Template 2023. All Rights Reserved.</p>
+              <strong className='dark:text-white'><span className='font-light'>Tetra</span>Blog</strong>
+              <p>© Tetra Template 2025. All Rights Reserved.</p>
             </div>
           </div>
           <div className="flex space-x-4 mt-4 md:mt-0">

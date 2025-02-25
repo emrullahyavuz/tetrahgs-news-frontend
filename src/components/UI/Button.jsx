@@ -2,11 +2,11 @@ import PropTypes from "prop-types";
 
 import "./Button.css";
 
-function Button({color,addClass,size,onDelete,onClick,children}) {
+function Button({color,textColor,addClass,size,onDelete,onClick,children}) {
   // const { color, addClass, size, onDelete, onClick, children } = props;
 
   return (
-    <button className={`btn btn-${color} btn-${size} ${addClass} w-full`} onClick={onDelete ? onDelete : onClick}>
+    <button className={`btn btn-${color} bg-[${color}] text-[${textColor}] btn-${size} ${addClass} w-full hover:text-white`} onClick={onDelete ? onDelete : onClick}>
       {children}
     </button>
   );
