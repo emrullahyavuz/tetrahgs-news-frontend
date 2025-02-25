@@ -15,7 +15,7 @@ const AboutPage = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-16">
       <h1 className="text-4xl text-[#231F20] font-bold text-center mb-8">
-        About Us
+        Hakkımızda
       </h1>
       <div className="flex flex-col md:flex-row items-center md:space-x-8">
         <div className="md:w-1/2 mb-8 md:mb-0">
@@ -51,7 +51,7 @@ const AboutPage = () => {
 
       <div className="mt-16">
         <h2 className="text-3xl text-[#231F20] font-bold text-center mb-8">
-          Our Mission
+          Misyonumuz
         </h2>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
           Misyonumuz, bireyleri ve kuruluşları anlayışlı ve ilgi çekici içerikle
@@ -61,7 +61,7 @@ const AboutPage = () => {
         </p>
 
         <h2 className="text-3xl text-[#231F20] font-bold text-center mb-8">
-          Our Team
+          Ekibimiz
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
