@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import tetraHGS from '../../assets/tetrahgs.png';
+import mail from '../../assets/mail.svg';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
@@ -85,7 +86,7 @@ const Footer = () => {
                     required
                   />
                   <img
-                    src="/images/mail.svg"
+                    src={mail}
                     width={20}
                     height={20}
                     alt="Email icon"

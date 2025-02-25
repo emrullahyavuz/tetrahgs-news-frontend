@@ -1,5 +1,6 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import DateInfo from "../DateInfo";
 
 const Cart = ({ id,title, category, image, description }) => {
   
@@ -39,12 +40,12 @@ const Cart = ({ id,title, category, image, description }) => {
             </div>
             
           </div>
-          <div className="blog-date border inline-block rounded-lg my-2 p-1 bg-gray-400 text-sm">
+          <div className="blog-date border inline-block rounded-lg my-2 p-1 bg-gray-100 text-sm">
               {splittedDate.map((item, index) => {
                 return (
-                  <span key={index} className="mx-1">
+                  <DateInfo key={index} className="mx-1 text-[#F7A91E] font-bold">
                     {item}
-                  </span>
+                  </DateInfo>
                 );
               })}
             </div>
