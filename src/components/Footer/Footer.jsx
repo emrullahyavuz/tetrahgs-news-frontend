@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import tetraHGS from '../../assets/tetrahgs.png';
 import mail from '../../assets/mail.svg';
+import Button from '../UI/Button';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
@@ -36,8 +37,8 @@ const Footer = () => {
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
           </p>
           <p className="mt-4">
-            <strong>Email:</strong> <span className='dark:text-gray-500'>info@jstemplate.net</span><br />
-            <strong>Phone:</strong> <span className='dark:text-gray-500'>880 123 456 789</span>
+            <strong>Email:</strong> <span className='dark:text-gray-500'>info@tetrablog.com</span><br />
+            <strong>Phone:</strong> <span className='dark:text-gray-500'>(123) 456-7890</span>
           </p>
         </div>
 
@@ -71,8 +72,8 @@ const Footer = () => {
 
         {/* Newsletter Section */}
         <div className='bg-white px-7 py-10 w-full h-[254px] rounded-[20px] dark:bg-[#242535]'>
-          <h3 className="text-lg font-semibold text-center">Weekly Newsletter</h3>
-          <p className="text-gray-600 text-center">Get blog articles and offers via email.</p>
+          <h3 className="text-lg font-semibold text-center">Haftalık Bülten</h3>
+          <p className="text-gray-600 text-center">Blog makalelerini e-posta yoluyla alın.</p>
           <div>
             <form onSubmit={handleSubmit} className="mt-0 md:mt-6">
               <div className="flex flex-col space-y-4">
@@ -93,12 +94,9 @@ const Footer = () => {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   />
                 </div>
-                <button
-                  type="submit"
-                  className="bg-[#4B6BFB] text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Subscribe
-                </button>
+                <Button color="#F7A91E" textColor="#231F20" addClass="w-full">
+                  Kaydol
+                </Button>
               </div>
               {message && (
                 <p className={`mt-2 text-sm ${message.includes('error') ? 'text-red-500' : 'text-green-500'}`}>

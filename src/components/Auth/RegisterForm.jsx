@@ -130,7 +130,7 @@ const RegisterForm = () => {
               )}
             </div>
           </div>
-          <Button color="primary" addClass="w-full">
+          <Button color="#F7A91E" textColor="#231F20" addClass="w-full">
             Kayıt Ol
           </Button>
         </form>
