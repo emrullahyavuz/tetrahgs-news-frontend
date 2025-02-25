@@ -105,7 +105,7 @@ const Header = () => {
 
       {/* Mobil Menü */}
       <div
-        className={`fixed inset-0 lg:hidden bg-white z-0 transform ${
+        className={`fixed inset-0 z-10 lg:hidden bg-white transform ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         } transition-transform duration-300 ease-in-out`}
       >
@@ -120,7 +120,7 @@ const Header = () => {
             Ürünler
           </NavLink>
           <NavLink
-            to="/hakkimizda"
+            to="/about"
             className={({ isActive }) =>
               isActive ? "text-blue-500" : "text-gray-700 hover:text-blue-500"
             }
@@ -129,7 +129,7 @@ const Header = () => {
             Hakkımızda
           </NavLink>
           <NavLink
-            to="/iletisim"
+            to="/contact"
             className={({ isActive }) =>
               isActive ? "text-blue-500" : "text-gray-700 hover:text-blue-500"
             }
