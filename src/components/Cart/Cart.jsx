@@ -1,8 +1,8 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 
-const Cart = ({ title, category, image, description }) => {
-  const id = useParams();
+const Cart = ({ id,title, category, image, description }) => {
+  
 
   const date = new Date();
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -13,11 +13,11 @@ const Cart = ({ title, category, image, description }) => {
   const splittedDate = formattedDate.split(",");
 
   return (
-    <Link href={`/post/${id}`} className="block">
+    <Link to={`/blog/${id}`} className="block">
       <div className="max-w-sm rounded-2xl overflow-hidden my-2 border-gray-200 dark:border-[#181A2A] border-2 shadow-sm hover:shadow-lg transition-shadow duration-300">
         {/* Thumbnail Image */}
         <div className="relative w-full h-60 p-3 ">
-          <img src={image} alt={title} className="w-full h-full object-cover" />
+          <img src={image} alt={title} className="w-full h-full object-cover"/>
         </div>
 
         {/* Card Content */}
