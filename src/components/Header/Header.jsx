@@ -1,13 +1,18 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import SwichDarkMode from '../../assets/SwichDarkMode.svg';
-import Swich from '../../assets/Swich.svg';
-import tetraHGS from '../../assets/tetrahgs.png';
+import { useEffect, useState } from "react";
+import { Link, NavLink } from "react-router-dom";
+import SwichDarkMode from "../../assets/SwichDarkMode.svg";
+import Swich from "../../assets/Swich.svg";
+import tetraHGS from "../../assets/tetrahgs.png";
 
 const Header = () => {
   const [darkMode, setDarkMode] = useState(false);
-  
-  const session = null; 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const session = null;
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -15,9 +20,9 @@ const Header = () => {
 
   useEffect(() => {
     if (darkMode) {
-      document.body.classList.add('dark');
+      document.body.classList.add("dark");
     } else {
-      document.body.classList.remove('dark');
+      document.body.classList.remove("dark");
     }
   }, [darkMode]);
 
@@ -34,29 +39,106 @@ const Header = () => {
             height={80}
             className="text-gray-600 dark:brightness-0 dark:invert"
           />
-          <span className="font-semibold text-xl"> <span className="font-light">Tetra</span>Blog</span>
+          <span className="font-semibold text-xl">
+            {" "}
+            <span className="font-light">Tetra</span>Blog
+          </span>
         </Link>
       </div>
 
       {/* Main Navigation */}
       <nav className="hidden md:flex items-center space-x-10 py-[6px] font-work-sans text-[#3B3C4A] dark:text-white ">
-        <Link to="/" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        <NavLink
+          to="/"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           Home
-        </Link>
-        <Link to="/blog" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        </NavLink>
+        <NavLink
+          to="/blog"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           Blog
-        </Link>
-        <Link to="/single-post" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        </NavLink>
+        <NavLink
+          to="/single-post"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           Single Post
-        </Link>
-        <Link to="/about" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        </NavLink>
+        <NavLink
+          to="/about"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           About
-        </Link>
-        <Link to="/contact" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        </NavLink>
+        <NavLink
+          to="/contact"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           Contact
-        </Link>
-        
+        </NavLink>
       </nav>
+
+      {/* Hamburger Menü Butonu */}
+      <button
+        onClick={toggleMenu}
+        className="lg:hidden z-10 p-2 w-full flex justify-end rounded-md  focus:outline-none"
+        aria-label="Ana menüyü aç/kapat"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          {isMenuOpen ? (
+            <path d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
+
+      {/* Mobil Menü */}
+      <div
+        className={`fixed inset-0 lg:hidden bg-white z-0 transform ${
+          isMenuOpen ? "translate-x-0" : "translate-x-full"
+        } transition-transform duration-300 ease-in-out`}
+      >
+        <div className="flex flex-col items-center justify-center h-full space-y-8 text-xl">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive ? "text-blue-500" : "text-gray-700 hover:text-blue-500"
+            }
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Ürünler
+          </NavLink>
+          <NavLink
+            to="/hakkimizda"
+            className={({ isActive }) =>
+              isActive ? "text-blue-500" : "text-gray-700 hover:text-blue-500"
+            }
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Hakkımızda
+          </NavLink>
+          <NavLink
+            to="/iletisim"
+            className={({ isActive }) =>
+              isActive ? "text-blue-500" : "text-gray-700 hover:text-blue-500"
+            }
+            onClick={() => setIsMenuOpen(false)}
+          >
+            İletişim
+          </NavLink>
+        </div>
+      </div>
 
       {/* Search and Theme Toggle */}
       <div className="flex items-center space-x-4 gap-10">
@@ -89,7 +171,7 @@ const Header = () => {
           aria-label="Toggle theme"
         >
           <img
-            src={darkMode ? SwichDarkMode: Swich}
+            src={darkMode ? SwichDarkMode : Swich}
             alt="Theme toggle"
             width={48}
             height={28}
@@ -107,16 +189,38 @@ const Header = () => {
               className="rounded-full"
             />
             <button className="flex items-center gap-2 hover:text-gray-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
               </svg>
               <span>Çıkış</span>
             </button>
           </div>
         ) : (
-          <button className="flex items-center gap-2 hover:text-gray-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+          <button className="hidden lg:flex items-center gap-2 hover:text-gray-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+              />
             </svg>
             <Link to="auth/login">Giriş Yap</Link>
           </button>

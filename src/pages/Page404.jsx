@@ -10,11 +10,10 @@ const Page404 = () => {
           <div className="mt-4">
             <div className="mb-4">
               <h1 className="text-4xl font-bold text-[#231F20] mb-2">
-                Page Not Found
+              Sayfa Bulunamadı
               </h1>
               <p className="text-gray-600">
-                Sorry, the page you are looking for doesn't exist or has been
-                moved.
+              Üzgünüz, aradığınız sayfa mevcut değil veya taşınmış.
               </p>
             </div>
   
@@ -27,7 +26,7 @@ const Page404 = () => {
               onClick={() => navigate("/") }
               className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-[#231F20] bg-[#F7A91E] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
             >
-              Back to Homepage
+              Ana Sayfaya Geri Dön
             </button>
           </div>
         </div>
