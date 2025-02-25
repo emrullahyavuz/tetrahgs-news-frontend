@@ -1,6 +1,5 @@
+import heroImage from "../../assets/hero-image.png";
 
-
-// components/HeroSection.jsx
 export default function Hero() {
     return (
       <div className="relative w-full bg-gray-900 text-white overflow-hidden rounded-lg h-[450px]">
@@ -8,7 +7,7 @@ export default function Hero() {
           <img
             width={900}
             height={450}
-            src="/images/blog-pictures/hero-image.png"
+            src={heroImage}
             alt="Hero Background"
             className="absolute inset-0 object-cover w-full h-full opacity-70"
           />

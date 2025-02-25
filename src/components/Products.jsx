@@ -4,16 +4,33 @@ import Cart from "./Cart/Cart";
 const Products = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const fetchData = async () => {
-    const response = await fetch("https://fakestoreapi.com/products");
-    const data = await response.json();
-    setBlogs(data);
-    setLoading(false);
+    try {
+      const response =  await fetch("https://fakestoreapi.com/products");
+      const data = await response.json();
+      setBlogs(data);
+    }
+    catch (error) {
+      console.log("error", error);
+    }
+    finally{
+      
+      setLoading(false);
+    }
+    
   };
 
   useEffect(() => {
     fetchData();
   }, []);
+
+
+  
+ 
+  
+
+  
 
   return (
     <div>

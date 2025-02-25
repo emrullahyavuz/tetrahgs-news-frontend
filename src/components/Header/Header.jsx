@@ -6,6 +6,7 @@ import tetraHGS from '../../assets/tetrahgs.png';
 
 const Header = () => {
   const [darkMode, setDarkMode] = useState(false);
+  
   const session = null; 
 
   const toggleDarkMode = () => {
@@ -49,7 +50,7 @@ const Header = () => {
           Single Post
         </Link>
         <Link to="/pages" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
-          Pages
+          About
         </Link>
         <Link to="/contact" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
           Contact
