@@ -8,8 +8,9 @@ const ContactPage = () => {
     message: '',
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = ({target:{name,value}}) => {
+    // const { name, value } = e.target;
+    
     setFormData({
       ...formData,
       [name]: value,

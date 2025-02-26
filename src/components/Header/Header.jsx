@@ -11,6 +11,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {auth,logout} = useAuth()
 
+
   const session = auth;
 
   const toggleMenu = () => {

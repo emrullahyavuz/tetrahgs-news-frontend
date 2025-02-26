@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Page404 from "./pages/Page404";
-import { MainRoutes } from "./routes/routes";
+import { AdminRoutes, MainRoutes } from "./routes/routes";
 import { AuthRoutes } from "./routes/routes";
 import toast, { Toaster } from 'react-hot-toast';
 import "./App.css";
@@ -8,6 +8,7 @@ import "./App.css";
 const router = createBrowserRouter([
   ...MainRoutes,
   ...AuthRoutes,
+  ...AdminRoutes,
   {
     path: "*",
     element: <Page404 />,
