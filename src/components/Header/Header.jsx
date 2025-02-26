@@ -3,12 +3,15 @@ import { Link, NavLink } from "react-router-dom";
 import SwichDarkMode from "../../assets/SwichDarkMode.svg";
 import Swich from "../../assets/Swich.svg";
 import tetraHGS from "../../assets/tetrahgs.png";
+import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const {auth,logout} = useAuth()
 
-  const session = false;
+  const session = auth;
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -181,13 +184,7 @@ const Header = () => {
         {/* Auth Buttons */}
         {session ? (
           <div className="flex items-center gap-4">
-            <img
-              src="/path/to/user/avatar" // replace with actual user avatar path
-              alt="User avatar"
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
+           
             <button className="flex items-center gap-2 hover:text-gray-600">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -203,7 +200,10 @@ const Header = () => {
                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                 />
               </svg>
-              <span>Çıkış</span>
+              <span onClick={() => {
+                toast.success("Çıkış Yapıldı")
+                logout()
+              }}>Çıkış</span>
             </button>
           </div>
         ) : (

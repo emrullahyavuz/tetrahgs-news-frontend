@@ -1,16 +1,16 @@
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import Button from "../UI/Button";
-import { loginSchema } from "../../schemas/auth.schema";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { loginSchema } from "../../schemas/auth.schema";
+import Button from "../UI/Button";
+import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
+
 
 const LoginForm = () => {
   const navigate = useNavigate();
-  const {auth} = useContext(AuthContext);
-  console.log(auth)
+  const {login} = useAuth()
+  
 
   const {
     register,
@@ -25,6 +25,7 @@ const LoginForm = () => {
 
   const notify = () => {
     toast.success("Giriş Başarılı!");
+    login();
     setTimeout(() => {
       navigate("/");
     }, 1000);
