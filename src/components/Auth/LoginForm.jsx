@@ -4,9 +4,13 @@ import Button from "../UI/Button";
 import { loginSchema } from "../../schemas/auth.schema";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const {auth} = useContext(AuthContext);
+  console.log(auth)
 
   const {
     register,
