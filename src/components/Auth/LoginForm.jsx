@@ -2,8 +2,12 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Button from "../UI/Button";
 import { loginSchema } from "../../schemas/auth.schema";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -14,9 +18,19 @@ const LoginForm = () => {
       rememberMe: false,
     },
   });
+
+  const notify = () => {
+    toast.success("Giriş Başarılı!");
+    setTimeout(() => {
+      navigate("/");
+    }, 1000);
+  };
+
   const onSubmit = (data) => {
     console.log(data);
+    notify();
   };
+
   return (
     <div className="login-form min-h-screen flex items-center justify-center">
       <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-6 shadow-md">
@@ -54,7 +68,6 @@ const LoginForm = () => {
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">
                   {errors.password.message}
-                  
                 </p>
               )}
             </div>

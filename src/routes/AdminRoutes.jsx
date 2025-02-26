@@ -11,7 +11,7 @@
 //             element: <Dashboard />
 //         },
 //         {
-//             path:"products",
+//             path:"blogs",
 //             element: <Products />
 //         }
 //         ]
