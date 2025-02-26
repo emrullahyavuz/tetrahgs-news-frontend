@@ -8,7 +8,7 @@ const Header = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const session = null;
+  const session = false;
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
