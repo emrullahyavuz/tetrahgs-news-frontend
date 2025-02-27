@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Link, NavLink } from "react-router-dom";
 import SwichDarkMode from "../../assets/SwichDarkMode.svg";
 import Swich from "../../assets/Swich.svg";
 import tetraHGS from "../../assets/tetrahgs.png";
 import { useAuth } from "../../context/AuthContext";
-import toast from "react-hot-toast";
+import Modal from "../UI/Modal";
 
 const Header = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const {auth,logout} = useAuth()
-
-
-  const session = auth;
+  const [showModal, setShowModal] = useState(false);
+  const { auth, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -30,8 +28,13 @@ const Header = () => {
     }
   }, [darkMode]);
 
+  const handleLogout = () => {
+    logout();
+    
+  };
+
   return (
-    <header className="flex justify-between items-center max-w-6xl mx-auto px-4  md:py-16 md:px-4 py-8 mb-10 w-full h-[100px]">
+    <header className="flex justify-between items-center max-w-6xl mx-auto px-4 md:py-16 md:px-4 py-8 mb-10 w-full h-[100px]">
       {/* Logo and Navigation */}
       <div className="flex items-center space-x-12">
         {/* Logo */}
@@ -44,7 +47,6 @@ const Header = () => {
             className="text-gray-600 dark:brightness-0 dark:invert"
           />
           <span className="font-semibold text-xl">
-            {" "}
             <span className="font-light">Tetra</span>Blog
           </span>
         </Link>
@@ -87,7 +89,7 @@ const Header = () => {
       {/* Hamburger Menü Butonu */}
       <button
         onClick={toggleMenu}
-        className="lg:hidden z-10 p-2 w-full flex justify-end rounded-md  focus:outline-none"
+        className="lg:hidden z-10 p-2 w-full flex justify-end rounded-md focus:outline-none"
         aria-label="Ana menüyü aç/kapat"
       >
         <svg
@@ -106,43 +108,6 @@ const Header = () => {
           )}
         </svg>
       </button>
-
-      {/* Mobil Menü */}
-      <div
-        className={`fixed inset-0 z-10 lg:hidden bg-white transform ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 ease-in-out`}
-      >
-        <div className="flex flex-col items-center justify-center h-full space-y-8 text-xl">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              isActive ? "text-blue-500" : "text-gray-700 hover:text-blue-500"
-            }
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Ürünler
-          </NavLink>
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              isActive ? "text-blue-500" : "text-gray-700 hover:text-blue-500"
-            }
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Hakkımızda
-          </NavLink>
-          <NavLink
-            to="/contact"
-            className={({ isActive }) =>
-              isActive ? "text-blue-500" : "text-gray-700 hover:text-blue-500"
-            }
-            onClick={() => setIsMenuOpen(false)}
-          >
-            İletişim
-          </NavLink>
-        </div>
-      </div>
 
       {/* Search and Theme Toggle */}
       <div className="flex items-center space-x-4 gap-10">
@@ -182,11 +147,14 @@ const Header = () => {
             className="text-gray-600"
           />
         </button>
+
         {/* Auth Buttons */}
-        {session ? (
+        {auth ? (
           <div className="flex items-center gap-4">
-           
-            <button className="flex items-center gap-2 hover:text-gray-600">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 hover:text-gray-600"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -201,14 +169,11 @@ const Header = () => {
                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                 />
               </svg>
-              <span onClick={() => {
-                toast.success("Çıkış Yapıldı")
-                logout()
-              }}>Çıkış</span>
+              <span>Çıkış</span>
             </button>
           </div>
         ) : (
-          <button className="hidden lg:flex items-center gap-2 hover:text-gray-600">
+          <button className="flex items-center gap-2 hover:text-gray-600">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
@@ -223,10 +188,19 @@ const Header = () => {
                 d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
               />
             </svg>
-            <Link to="auth/login">Giriş Yap</Link>
+            <Link to="/auth/login">Giriş Yap</Link>
           </button>
         )}
       </div>
+
+      {showModal && (
+        <Modal
+          title="Çıkış Yap"
+          desc="Çıkış yapmak istediğinize emin misiniz?"
+          setShowModal={setShowModal}
+          onConfirm={handleLogout}
+        />
+      )}
     </header>
   );
 };
