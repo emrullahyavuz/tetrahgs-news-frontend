@@ -66,31 +66,7 @@ export default function Sidebar({ categories }) {
         </div>
       </div>
 
-      {/* Newsletter */}
-      <div className="bg-blue-50 rounded-lg shadow-md p-5">
-        <h3 className="text-lg font-bold mb-2">Bültenimize Abone Olun</h3>
-        <p className="text-gray-600 text-sm mb-4">
-          Haftalık teknoloji haberlerini ve özel içerikleri e-posta kutunuza alın.
-        </p>
-        <form className="space-y-3">
-          <input
-            type="text"
-            placeholder="Adınız"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="email"
-            placeholder="E-posta adresiniz"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Abone Ol
-          </button>
-        </form>
-      </div>
+      
     </div>
   )
 }

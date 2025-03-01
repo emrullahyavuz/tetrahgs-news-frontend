@@ -3,6 +3,7 @@ import HomePage from "../pages/HomePage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import BlogDetailPage from "../pages/BlogDetailPage";
+import TechNewsPage from "../components/tech-news-page";
 
 
 export const MainRoutes = [
@@ -13,6 +14,10 @@ export const MainRoutes = [
         {
             path:"/",
             element: <HomePage />
+        },
+        {
+            path:"technology",
+            element: <TechNewsPage />
         },
         {
             path:"about",

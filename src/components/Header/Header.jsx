@@ -67,10 +67,10 @@ const Header = () => {
           Blog
         </NavLink>
         <NavLink
-          to="/single-post"
+          to="/technology"
           className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
         >
-          Single Post
+          Teknolojik Haberler
         </NavLink>
         <NavLink
           to="/about"
