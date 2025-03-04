@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import {
@@ -368,7 +366,7 @@ const BlogDetail = () => {
           {/* Back Button */}
           <Link to="/" className="inline-flex items-center text-[#4B6BFB] mb-6 hover:underline">
             <ArrowLeft size={18} className="mr-2" />
-            Back to all articles
+           <span className="text-[#F7A91E]">Back to all articles</span>
           </Link>
 
           {/* Blog Header */}
@@ -515,10 +513,10 @@ const BlogDetail = () => {
                     </div>
                     <button
                       type="submit"
-                      className="inline-flex items-center px-6 py-3 bg-[#4B6BFB] text-white rounded-lg hover:bg-[#3A5AEA] transition-colors"
+                      className="inline-flex items-center px-6 py-3 bg-[#F7A91E]  rounded-lg transition-colors"
                     >
-                      <Send className="w-4 h-4 mr-2" />
-                      Post Comment
+                      <Send className="w-4 h-4 mr-2 text-[#231F20]" />
+                     <span className="text-[#231F20] hover:text-white "> Post Comment</span>
                     </button>
                   </form>
                 </div>
@@ -543,8 +541,8 @@ const BlogDetail = () => {
                       </>
                     ) : (
                       <>
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Show All Comments ({comments.length})
+                        <ChevronDown className="w-4 h-4 mr-2 text-[#F7A91E]" />
+                        <span className="text-[#F7A91E]">Show All Comments ({comments.length})</span>
                       </>
                     )}
                   </button>
@@ -589,28 +587,7 @@ const BlogDetail = () => {
                 </div>
               </div>
 
-              {/* Newsletter Card */}
-              <div className="bg-gradient-to-r from-[#4B6BFB] to-purple-600 rounded-xl shadow-sm p-6 mb-6 text-white">
-                <h3 className="font-medium text-lg mb-2">Subscribe to our Newsletter</h3>
-                <p className="text-white/80 text-sm mb-4">
-                  Get the latest articles and tutorials delivered straight to your inbox weekly.
-                </p>
-                <form className="mt-4">
-                  <div className="flex">
-                    <input
-                      type="email"
-                      placeholder="Your email address"
-                      className="flex-1 px-4 py-2 rounded-l-lg text-gray-900 focus:outline-none"
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-white text-[#4B6BFB] rounded-r-lg font-medium hover:bg-gray-100 transition-colors"
-                    >
-                      Subscribe
-                    </button>
-                  </div>
-                </form>
-              </div>
+             
 
               {/* Tags Card */}
               <div className="bg-white dark:bg-[#181A2A] rounded-xl shadow-sm p-6">

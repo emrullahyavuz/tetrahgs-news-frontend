@@ -1,34 +1,32 @@
-"use client"
-
-import { useState } from "react"
-import Sidebar from "./sidebar"
-import Dashboard from "./dashboard"
-import NewsManagement from "./news-management"
-import CategoryManagement from "./category-management"
-import UserManagement from "./user-management"
-import Settings from "./settings"
-import { Menu, X, Bell, User } from "lucide-react"
+import { useState } from "react";
+import Sidebar from "./sidebar";
+import Dashboard from "./dashboard";
+import NewsManagement from "./news-management";
+import CategoryManagement from "./category-management";
+import UserManagement from "./user-management";
+import Settings from "./settings";
+import { Menu, X, Bell, User } from "lucide-react";
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState("dashboard")
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-        return <Dashboard />
+        return <Dashboard />;
       case "news":
-        return <NewsManagement />
+        return <NewsManagement />;
       case "categories":
-        return <CategoryManagement />
+        return <CategoryManagement />;
       case "users":
-        return <UserManagement />
+        return <UserManagement />;
       case "settings":
-        return <Settings />
+        return <Settings />;
       default:
-        return <Dashboard />
+        return <Dashboard />;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -42,7 +40,9 @@ export default function AdminPanel() {
             >
               {isMobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <h1 className="text-xl font-bold text-blue-600">TeknoHaber Admin</h1>
+            <h1 className="text-xl font-bold text-[#F7A91E]">
+              TetraBlog Admin
+            </h1>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -53,7 +53,9 @@ export default function AdminPanel() {
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
                 <User size={18} />
               </div>
-              <span className="hidden md:inline text-sm font-medium">Admin Kullanıcı</span>
+              <span className="hidden md:inline text-sm text-[#F7A91E] font-medium">
+                Admin Kullanıcı
+              </span>
             </div>
           </div>
         </div>
@@ -66,12 +68,15 @@ export default function AdminPanel() {
             className="md:hidden fixed inset-0 z-20 bg-black bg-opacity-50"
             onClick={() => setIsMobileSidebarOpen(false)}
           >
-            <div className="w-64 h-full bg-white" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="w-64 h-full bg-white"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Sidebar
                 activeTab={activeTab}
                 setActiveTab={(tab) => {
-                  setActiveTab(tab)
-                  setIsMobileSidebarOpen(false)
+                  setActiveTab(tab);
+                  setIsMobileSidebarOpen(false);
                 }}
               />
             </div>
@@ -87,6 +92,5 @@ export default function AdminPanel() {
         <main className="flex-1 overflow-auto p-6">{renderContent()}</main>
       </div>
     </div>
-  )
+  );
 }
-

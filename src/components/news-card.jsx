@@ -11,7 +11,7 @@ export default function NewsCard({ news }) {
         <p className="text-gray-600 text-sm mb-3 line-clamp-3">{news.summary}</p>
         <div className="flex justify-between items-center">
           <span className="text-xs text-gray-500">Yazar: {news.author}</span>
-          <a href="#" className="text-blue-600 text-sm font-medium hover:text-blue-800 transition-colors">
+          <a href="#" className="text-[#F7A91E] text-sm font-medium hover:text-blue-800 transition-colors">
             Devamını Oku →
           </a>
         </div>

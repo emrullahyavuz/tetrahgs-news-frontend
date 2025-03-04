@@ -1,7 +1,3 @@
-"use client";
-
-import { useState } from "react";
-import { Search, Bell, Menu, X } from "lucide-react";
 import NewsCard from "./news-card";
 import FeaturedNews from "./featured-news";
 import Sidebar from "./sidebar";
@@ -110,7 +106,7 @@ export default function TechNewsPage() {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <button className="bg-white border border-blue-600 text-blue-600 px-6 py-2 rounded-md hover:bg-blue-50 transition-colors">
+            <button className="bg-[#F7A91E] border text-[#231F20] px-6 py-2 rounded-md hover:bg-blue-50 transition-colors">
               Daha Fazla Göster
             </button>
           </div>

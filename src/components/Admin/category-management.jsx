@@ -1,12 +1,10 @@
-"use client"
-
-import { useState } from "react"
-import { Plus, Edit, Trash2 } from "lucide-react"
+import { useState } from "react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 
 export default function CategoryManagement() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   // Mock data for categories
   const categories = [
@@ -17,10 +15,34 @@ export default function CategoryManagement() {
       count: 45,
       description: "Yapay zeka teknolojileri ve gelişmeleri",
     },
-    { id: 2, name: "Donanım", slug: "donanim", count: 38, description: "Bilgisayar ve elektronik donanım haberleri" },
-    { id: 3, name: "Yazılım", slug: "yazilim", count: 32, description: "Yazılım geliştirme ve uygulama haberleri" },
-    { id: 4, name: "Mobil", slug: "mobil", count: 28, description: "Mobil cihazlar ve uygulamalar hakkında haberler" },
-    { id: 5, name: "Oyun", slug: "oyun", count: 25, description: "Video oyunları ve oyun teknolojileri" },
+    {
+      id: 2,
+      name: "Donanım",
+      slug: "donanim",
+      count: 38,
+      description: "Bilgisayar ve elektronik donanım haberleri",
+    },
+    {
+      id: 3,
+      name: "Yazılım",
+      slug: "yazilim",
+      count: 32,
+      description: "Yazılım geliştirme ve uygulama haberleri",
+    },
+    {
+      id: 4,
+      name: "Mobil",
+      slug: "mobil",
+      count: 28,
+      description: "Mobil cihazlar ve uygulamalar hakkında haberler",
+    },
+    {
+      id: 5,
+      name: "Oyun",
+      slug: "oyun",
+      count: 25,
+      description: "Video oyunları ve oyun teknolojileri",
+    },
     {
       id: 6,
       name: "Siber Güvenlik",
@@ -42,17 +64,17 @@ export default function CategoryManagement() {
       count: 15,
       description: "Otomotiv sektöründeki teknolojik gelişmeler",
     },
-  ]
+  ];
 
   const handleEdit = (category) => {
-    setSelectedCategory(category)
-    setIsAddModalOpen(true)
-  }
+    setSelectedCategory(category);
+    setIsAddModalOpen(true);
+  };
 
   const handleDelete = (category) => {
-    setSelectedCategory(category)
-    setIsDeleteModalOpen(true)
-  }
+    setSelectedCategory(category);
+    setIsDeleteModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -61,8 +83,8 @@ export default function CategoryManagement() {
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center"
           onClick={() => {
-            setSelectedCategory(null)
-            setIsAddModalOpen(true)
+            setSelectedCategory(null);
+            setIsAddModalOpen(true);
           }}
         >
           <Plus size={18} className="mr-1" />
@@ -112,22 +134,34 @@ export default function CategoryManagement() {
               {categories.map((category) => (
                 <tr key={category.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{category.name}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {category.name}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{category.slug}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-500 line-clamp-1">{category.description}</div>
+                    <div className="text-sm text-gray-500 line-clamp-1">
+                      {category.description}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{category.count}</div>
+                    <div className="text-sm text-gray-500">
+                      {category.count}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3" onClick={() => handleEdit(category)}>
+                    <button
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      onClick={() => handleEdit(category)}
+                    >
                       <Edit size={18} />
                     </button>
-                    <button className="text-red-600 hover:text-red-900" onClick={() => handleDelete(category)}>
+                    <button
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => handleDelete(category)}
+                    >
                       <Trash2 size={18} />
                     </button>
                   </td>
@@ -142,10 +176,16 @@ export default function CategoryManagement() {
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -153,11 +193,16 @@ export default function CategoryManagement() {
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                     <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      {selectedCategory ? "Kategoriyi Düzenle" : "Yeni Kategori Ekle"}
+                      {selectedCategory
+                        ? "Kategoriyi Düzenle"
+                        : "Yeni Kategori Ekle"}
                     </h3>
                     <div className="mt-4 space-y-4">
                       <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="name"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Kategori Adı
                         </label>
                         <input
@@ -168,7 +213,10 @@ export default function CategoryManagement() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="slug"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Slug
                         </label>
                         <input
@@ -179,7 +227,10 @@ export default function CategoryManagement() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="description"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Açıklama
                         </label>
                         <textarea
@@ -218,10 +269,16 @@ export default function CategoryManagement() {
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -231,11 +288,13 @@ export default function CategoryManagement() {
                     <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Kategoriyi Sil</h3>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Kategoriyi Sil
+                    </h3>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
-                        Bu kategoriyi silmek istediğinizden emin misiniz? Bu kategoriye ait tüm haberler de
-                        silinecektir.
+                        Bu kategoriyi silmek istediğinizden emin misiniz? Bu
+                        kategoriye ait tüm haberler de silinecektir.
                       </p>
                     </div>
                   </div>
@@ -262,6 +321,5 @@ export default function CategoryManagement() {
         </div>
       )}
     </div>
-  )
+  );
 }
-

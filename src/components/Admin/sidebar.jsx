@@ -1,4 +1,5 @@
 import { LayoutDashboard, Newspaper, Tag, Users, Settings, LogOut, ExternalLink } from "lucide-react"
+import { Link } from "react-router-dom"
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const menuItems = [
@@ -13,7 +14,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     <div className="h-full flex flex-col">
       <div className="p-4">
         <div className="flex items-center justify-center p-2 mb-6">
-          <h2 className="text-xl font-bold text-blue-600">TeknoHaber</h2>
+          <h2 className="text-xl font-bold text-[#F7A91E]">TetraHaber</h2>
         </div>
 
         <nav className="space-y-1">
@@ -33,13 +34,13 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       </div>
 
       <div className="mt-auto p-4 border-t">
-        <a
-          href="/"
+        <Link
+          to="/"
           className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-md transition-colors"
         >
           <ExternalLink size={18} />
           <span>Siteye Git</span>
-        </a>
+        </Link>
         <button className="w-full flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-md transition-colors">
           <LogOut size={18} />
           <span>Çıkış Yap</span>

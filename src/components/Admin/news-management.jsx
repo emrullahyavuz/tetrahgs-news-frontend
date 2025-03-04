@@ -1,12 +1,10 @@
-"use client"
-
-import { useState } from "react"
-import { Search, Plus, Edit, Trash2, Eye, Filter } from "lucide-react"
+import { useState } from "react";
+import { Search, Plus, Edit, Trash2, Eye, Filter } from "lucide-react";
 
 export default function NewsManagement() {
-  const [selectedNews, setSelectedNews] = useState(null)
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedNews, setSelectedNews] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Mock data for news items
   const newsItems = [
@@ -78,7 +76,8 @@ export default function NewsManagement() {
     },
     {
       id: 7,
-      title: "New Quantum Computing Breakthrough Could Revolutionize Data Processing",
+      title:
+        "New Quantum Computing Breakthrough Could Revolutionize Data Processing",
       summary:
         "Scientists have achieved a significant breakthrough in quantum computing that could transform how we process complex data.",
       category: "Quantum Bilişim",
@@ -87,17 +86,17 @@ export default function NewsManagement() {
       date: "23 Şubat 2025",
       views: 876,
     },
-  ]
+  ];
 
   const handleEdit = (news) => {
-    setSelectedNews(news)
-    setIsAddModalOpen(true)
-  }
+    setSelectedNews(news);
+    setIsAddModalOpen(true);
+  };
 
   const handleDelete = (news) => {
-    setSelectedNews(news)
-    setIsDeleteModalOpen(true)
-  }
+    setSelectedNews(news);
+    setIsDeleteModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -106,8 +105,8 @@ export default function NewsManagement() {
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center"
           onClick={() => {
-            setSelectedNews(null)
-            setIsAddModalOpen(true)
+            setSelectedNews(null);
+            setIsAddModalOpen(true);
           }}
         >
           <Plus size={18} className="mr-1" />
@@ -124,7 +123,10 @@ export default function NewsManagement() {
               placeholder="Haber ara..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+            <Search
+              className="absolute left-3 top-2.5 text-gray-400"
+              size={18}
+            />
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -205,7 +207,9 @@ export default function NewsManagement() {
               {newsItems.map((news) => (
                 <tr key={news.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{news.title}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {news.title}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{news.category}</div>
@@ -216,11 +220,15 @@ export default function NewsManagement() {
                         news.status === "published"
                           ? "bg-green-100 text-green-800"
                           : news.status === "draft"
-                            ? "bg-gray-100 text-gray-800"
-                            : "bg-yellow-100 text-yellow-800"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
-                      {news.status === "published" ? "Yayında" : news.status === "draft" ? "Taslak" : "İncelemede"}
+                      {news.status === "published"
+                        ? "Yayında"
+                        : news.status === "draft"
+                        ? "Taslak"
+                        : "İncelemede"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -233,13 +241,19 @@ export default function NewsManagement() {
                     <div className="text-sm text-gray-500">{news.views}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3" onClick={() => handleEdit(news)}>
+                    <button
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      onClick={() => handleEdit(news)}
+                    >
                       <Edit size={18} />
                     </button>
                     <button className="text-gray-600 hover:text-gray-900 mr-3">
                       <Eye size={18} />
                     </button>
-                    <button className="text-red-600 hover:text-red-900" onClick={() => handleDelete(news)}>
+                    <button
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => handleDelete(news)}
+                    >
                       <Trash2 size={18} />
                     </button>
                   </td>
@@ -254,12 +268,16 @@ export default function NewsManagement() {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-700">
-                Toplam <span className="font-medium">7</span> haberden <span className="font-medium">1</span> ile{" "}
+                Toplam <span className="font-medium">7</span> haberden{" "}
+                <span className="font-medium">1</span> ile{" "}
                 <span className="font-medium">7</span> arası gösteriliyor
               </p>
             </div>
             <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <nav
+                className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                aria-label="Pagination"
+              >
                 <a
                   href="#"
                   className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
@@ -303,10 +321,16 @@ export default function NewsManagement() {
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -318,7 +342,10 @@ export default function NewsManagement() {
                     </h3>
                     <div className="mt-4 space-y-4">
                       <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="title"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Başlık
                         </label>
                         <input
@@ -329,7 +356,10 @@ export default function NewsManagement() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="summary" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="summary"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Özet
                         </label>
                         <textarea
@@ -341,7 +371,10 @@ export default function NewsManagement() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="category"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Kategori
                           </label>
                           <select
@@ -355,11 +388,16 @@ export default function NewsManagement() {
                             <option value="Yapay Zeka">Yapay Zeka</option>
                             <option value="Mobil">Mobil</option>
                             <option value="Otomotiv">Otomotiv</option>
-                            <option value="Uzay Teknolojileri">Uzay Teknolojileri</option>
+                            <option value="Uzay Teknolojileri">
+                              Uzay Teknolojileri
+                            </option>
                           </select>
                         </div>
                         <div>
-                          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="status"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Durum
                           </label>
                           <select
@@ -374,7 +412,10 @@ export default function NewsManagement() {
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="image"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Görsel
                         </label>
                         <div className="mt-1 flex items-center">
@@ -387,7 +428,10 @@ export default function NewsManagement() {
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="content"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           İçerik
                         </label>
                         <textarea
@@ -426,10 +470,16 @@ export default function NewsManagement() {
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -439,10 +489,13 @@ export default function NewsManagement() {
                     <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Haberi Sil</h3>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Haberi Sil
+                    </h3>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
-                        Bu haberi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                        Bu haberi silmek istediğinizden emin misiniz? Bu işlem
+                        geri alınamaz.
                       </p>
                     </div>
                   </div>
@@ -469,6 +522,5 @@ export default function NewsManagement() {
         </div>
       )}
     </div>
-  )
+  );
 }
-

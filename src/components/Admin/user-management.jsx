@@ -1,12 +1,10 @@
-"use client"
-
-import { useState } from "react"
-import { Search, Edit, Trash2, Filter, UserPlus } from "lucide-react"
+import { useState } from "react";
+import { Search, Edit, Trash2, Filter, UserPlus } from "lucide-react";
 
 export default function UserManagement() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // Mock data for users
   const users = [
@@ -55,17 +53,17 @@ export default function UserManagement() {
       lastLogin: "25 Şubat 2025, 13:10",
       articles: 15,
     },
-  ]
+  ];
 
   const handleEdit = (user) => {
-    setSelectedUser(user)
-    setIsAddModalOpen(true)
-  }
+    setSelectedUser(user);
+    setIsAddModalOpen(true);
+  };
 
   const handleDelete = (user) => {
-    setSelectedUser(user)
-    setIsDeleteModalOpen(true)
-  }
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -74,8 +72,8 @@ export default function UserManagement() {
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center"
           onClick={() => {
-            setSelectedUser(null)
-            setIsAddModalOpen(true)
+            setSelectedUser(null);
+            setIsAddModalOpen(true);
           }}
         >
           <UserPlus size={18} className="mr-1" />
@@ -92,7 +90,10 @@ export default function UserManagement() {
               placeholder="Kullanıcı ara..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+            <Search
+              className="absolute left-3 top-2.5 text-gray-400"
+              size={18}
+            />
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -167,11 +168,17 @@ export default function UserManagement() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 font-medium">{user.name.charAt(0)}</span>
+                        <span className="text-blue-600 font-medium">
+                          {user.name.charAt(0)}
+                        </span>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -181,29 +188,45 @@ export default function UserManagement() {
                         user.role === "admin"
                           ? "bg-purple-100 text-purple-800"
                           : user.role === "editor"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
                       }`}
                     >
-                      {user.role === "admin" ? "Admin" : user.role === "editor" ? "Editör" : "Yazar"}
+                      {user.role === "admin"
+                        ? "Admin"
+                        : user.role === "editor"
+                        ? "Editör"
+                        : "Yazar"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                        user.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {user.status === "active" ? "Aktif" : "Pasif"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.lastLogin}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.articles}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.lastLogin}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.articles}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3" onClick={() => handleEdit(user)}>
+                    <button
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      onClick={() => handleEdit(user)}
+                    >
                       <Edit size={18} />
                     </button>
-                    <button className="text-red-600 hover:text-red-900" onClick={() => handleDelete(user)}>
+                    <button
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => handleDelete(user)}
+                    >
                       <Trash2 size={18} />
                     </button>
                   </td>
@@ -218,10 +241,16 @@ export default function UserManagement() {
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -229,11 +258,16 @@ export default function UserManagement() {
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                     <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      {selectedUser ? "Kullanıcıyı Düzenle" : "Yeni Kullanıcı Ekle"}
+                      {selectedUser
+                        ? "Kullanıcıyı Düzenle"
+                        : "Yeni Kullanıcı Ekle"}
                     </h3>
                     <div className="mt-4 space-y-4">
                       <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="name"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Ad Soyad
                         </label>
                         <input
@@ -244,7 +278,10 @@ export default function UserManagement() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="email"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           E-posta
                         </label>
                         <input
@@ -256,7 +293,10 @@ export default function UserManagement() {
                       </div>
                       {!selectedUser && (
                         <div>
-                          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="password"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Şifre
                           </label>
                           <input
@@ -268,7 +308,10 @@ export default function UserManagement() {
                       )}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="role"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Rol
                           </label>
                           <select
@@ -282,7 +325,10 @@ export default function UserManagement() {
                           </select>
                         </div>
                         <div>
-                          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="status"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Durum
                           </label>
                           <select
@@ -324,10 +370,16 @@ export default function UserManagement() {
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -337,10 +389,13 @@ export default function UserManagement() {
                     <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Kullanıcıyı Sil</h3>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Kullanıcıyı Sil
+                    </h3>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
-                        Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                        Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu
+                        işlem geri alınamaz.
                       </p>
                     </div>
                   </div>
@@ -367,6 +422,5 @@ export default function UserManagement() {
         </div>
       )}
     </div>
-  )
+  );
 }
-

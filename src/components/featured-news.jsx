@@ -20,7 +20,7 @@ export default function FeaturedNews({ news }) {
           <p className="text-gray-600 mb-6">{news.summary}</p>
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">Yazar: {news.author}</span>
-            <a href="#" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+            <a href="#" className="bg-[#F7A91E] text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
               Haberi Oku
             </a>
           </div>

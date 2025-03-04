@@ -30,7 +30,7 @@ export default function Sidebar({ categories }) {
     <div className="space-y-8">
       {/* Categories */}
       <div className="bg-white rounded-lg shadow-md p-5">
-        <h3 className="text-lg font-bold mb-4">Kategoriler</h3>
+        <h3 className="text-lg text-[#F7A91E] font-bold mb-4">Kategoriler</h3>
         <ul className="space-y-2">
           {categories.map((category, index) => (
             <li key={index}>
@@ -48,7 +48,7 @@ export default function Sidebar({ categories }) {
 
       {/* Popular Posts */}
       <div className="bg-white rounded-lg shadow-md p-5">
-        <h3 className="text-lg font-bold mb-4">Popüler Haberler</h3>
+        <h3 className="text-lg text-[#F7A91E] font-bold mb-4">Popüler Haberler</h3>
         <div className="space-y-4">
           {popularPosts.map((post) => (
             <div key={post.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
