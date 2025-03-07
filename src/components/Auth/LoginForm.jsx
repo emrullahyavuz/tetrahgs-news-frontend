@@ -31,10 +31,35 @@ const LoginForm = () => {
     }, 2000);
   };
 
-  const onSubmit = (data) => {
-    console.log(data);
-    notify();
-  };
+  
+
+  const onSubmit = async ({email,password}) => {
+    console.log(email,password);
+    
+    try {
+      const response = await fetch("http://localhost:5005/api/auth/login", {
+        method: 'POST',
+        body: JSON.stringify({email,password}),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Giriş işlemi başarısız');
+      }
+      else {
+       notify()
+      }
+    }
+    catch (error) {
+        console.error('Giriş hatası:', error);
+        throw error;
+    }
+
+    }
 
   return (
     <div className="login-form min-h-screen flex items-center justify-center">

@@ -120,7 +120,7 @@ const Footer = () => {
               className="dark:brightness-0 dark:invert"
             />
             <div className="logo-info">
-              <strong className='dark:text-white'><span className='font-light'>Tetra</span>Blog</strong>
+              <strong className='dark:text-white'><span className='font-light'>Tetra</span>Haber</strong>
               <p>© Tetra Template 2025. All Rights Reserved.</p>
             </div>
           </div>

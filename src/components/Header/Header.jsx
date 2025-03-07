@@ -47,7 +47,7 @@ const Header = () => {
             className="text-gray-600 dark:brightness-0 dark:invert"
           />
           <span className="font-semibold text-xl">
-            <span className="font-light">Tetra</span>Blog
+            <span className="font-light">Tetra</span>Haber
           </span>
         </Link>
       </div>
