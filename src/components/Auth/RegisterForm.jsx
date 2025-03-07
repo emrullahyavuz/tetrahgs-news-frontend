@@ -1,8 +1,10 @@
-import Button from "../UI/Button";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { registerSchema } from "../../schemas/auth.schema";
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useNavigate } from "react-router-dom";
+import { registerSchema } from '../../schemas/auth.schema';
 
+import Button from '../UI/Button';
+import toast from 'react-hot-toast';
 
 const RegisterForm = () => {
   const {
@@ -17,12 +19,57 @@ const RegisterForm = () => {
     },
   });
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const navigate = useNavigate();
+
+  const notify = (role) => {
+    toast.success("Kayıt İşlemi Başarılı!");
+    if(role === "business")
+    {
+      setTimeout(() => {
+        navigate("/admin/dashboard",{ replace: true })
+      }, 2000);
+    }
+    else {
+      setTimeout(() => {
+        navigate("/")
+      }, 2000);
+     
+    }
   };
+
+  const onSubmit = async (data) => {
+    console.log(data);
+    const {fullName, email, password, userType, gender} = data;
+    try {
+      const response = await fetch("http://localhost:5005/api/auth/register", {
+        method: 'POST',
+        body: JSON.stringify({fullName, email, password, userType, gender}),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+
+      
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Giriş işlemi başarısız');
+      }
+
+      else {
+       notify(userType)
+       
+      }
+    }
+    catch(err)
+    {
+      console.log("Kayıt işlemi başarısız", err);
+    }
+  };
+
   return (
     <div className="register-form min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-[500px] space-y-8 rounded-lg bg-white p-6 shadow-md">
+      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-6 shadow-md">
         <h2 className="text-center text-3xl font-bold text-gray-900">
           Kayıt Ol
         </h2>
@@ -33,61 +80,77 @@ const RegisterForm = () => {
                 Ad Soyad
               </label>
               <input
+                {...register('fullName', { required: true })}
                 type="text"
-                className="mt-1 block w-full rounded-md  border-gray-300"
+                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
                 placeholder="Ad Soyad"
-                {...register("fullName", { required: true })}
               />
               {errors.fullName && (
-                <p className="text-red-500">{errors.fullName.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.fullName.message}
+                </p>
               )}
             </div>
+
             <div className="form-item">
               <label className="block text-sm font-medium text-gray-700">
                 Email
               </label>
               <input
+                {...register('email', { required: true })}
                 type="email"
-                className="mt-1 block w-full rounded-md  border-gray-300"
+                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
                 placeholder="ornek@email.com"
-                {...register("email", { required: true })}
               />
-              {errors.email && <p>{errors.email.message}</p>}
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
+
             <div className="form-item">
               <label className="block text-sm font-medium text-gray-700">
                 Şifre
               </label>
               <input
+                {...register('password', { required: true })}
                 type="password"
-                className="mt-1 block w-full rounded-md  border-gray-300"
+                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
                 placeholder="******"
-                {...register("password", { required: true })}
               />
-              {errors.password && <p>{errors.password.message}</p>}
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
+
             <div className="form-item">
               <label className="block text-sm font-medium text-gray-700">
                 Şifre Tekrar
               </label>
               <input
+                {...register('confirmPassword', { required: true })}
                 type="password"
-                className="mt-1 block w-full rounded-md  border-gray-300"
+                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
                 placeholder="******"
-                {...register("passwordConfirm", { required: true })}
               />
-              {errors.passwordConfirm && (
-                <p>{errors.passwordConfirm.message}</p>
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
-            <div className="form-item">
+
+            <div className="form-item space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Hesap Türü
                 </label>
                 <select
                   className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                  {...register("userType", { required: true })}
+                  {...register('userType')}
                 >
                   <option value="">Seçiniz</option>
                   <option value="personal">Bireysel</option>
@@ -122,7 +185,7 @@ const RegisterForm = () => {
                 />
                 <label className="ml-2 text-sm text-gray-900">Kadın</label>
               </div>
-              
+             
               {errors.gender && (
                 <p className="mt-1 text-sm text-red-600">
                   {errors.gender.message}
@@ -138,4 +201,5 @@ const RegisterForm = () => {
     </div>
   );
 };
+
 export default RegisterForm;
