@@ -1,17 +1,11 @@
-// src/admin/UserManagement.jsx
-
-import React, { useState, useEffect } from 'react';
-import { getUsers, deleteUser } from '../../services/adminService';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { getUsers, deleteUser } from "../../services/adminService";
+import { Link } from "react-router-dom";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -20,21 +14,24 @@ const UserManagement = () => {
       setUsers(data);
       setError(null);
     } catch (err) {
-      setError('Kullanıcıları yüklerken bir hata oluştu.');
+      setError("Kullanıcıları yüklerken bir hata oluştu.");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
+    useEffect(() => {
+      fetchUsers();
+    }, []);
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
+    if (window.confirm("Bu kullanıcıyı silmek istediğinizden emin misiniz?")) {
       try {
         await deleteUser(userId);
         // Kullanıcı listesini güncelle
-        setUsers(users.filter(user => user.id !== userId));
+        setUsers(users.filter((user) => user.id !== userId));
       } catch (err) {
-        setError('Kullanıcı silinirken bir hata oluştu.');
+        setError("Kullanıcı silinirken bir hata oluştu.");
         console.error(err);
       }
     }
@@ -46,11 +43,11 @@ const UserManagement = () => {
   return (
     <div className="user-management">
       <h2>Kullanıcı Yönetimi</h2>
-      
+
       <Link to="/admin/users/new" className="btn btn-primary">
         Yeni Kullanıcı Ekle
       </Link>
-      
+
       <table className="users-table">
         <thead>
           <tr>
@@ -64,7 +61,7 @@ const UserManagement = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
+          {users.map((user) => (
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.fullName}</td>
@@ -73,11 +70,14 @@ const UserManagement = () => {
               <td>{user.status}</td>
               <td>{new Date(user.lastLogin).toLocaleString()}</td>
               <td>
-                <Link to={`/admin/users/edit/${user.id}`} className="btn btn-sm btn-edit">
+                <Link
+                  to={`/admin/users/edit/${user.id}`}
+                  className="btn btn-sm btn-edit"
+                >
                   Düzenle
                 </Link>
-                <button 
-                  onClick={() => handleDeleteUser(user.id)} 
+                <button
+                  onClick={() => handleDeleteUser(user.id)}
                   className="btn btn-sm btn-delete"
                 >
                   Sil
