@@ -41,7 +41,7 @@ const RegisterForm = () => {
     console.log(data);
     const {fullName, email, password, userType, gender} = data;
     try {
-      const response = await fetch("http://localhost:5005/api/auth/register", {
+      const response = await fetch("http://localhost:5000/api/auth/register", {
         method: 'POST',
         body: JSON.stringify({fullName, email, password, userType, gender}),
         headers: {
