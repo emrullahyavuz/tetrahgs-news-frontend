@@ -31,9 +31,6 @@ export default function AdminPanel() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
-      <AdminHeader />
-
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Mobile */}
         {isMobileSidebarOpen && (
