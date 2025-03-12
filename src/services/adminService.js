@@ -13,6 +13,17 @@ export const getUsers = async () => {
   }
 };
 
+// Create user
+export const createUser = async (userData) => {
+  try {
+    console.log(userData)
+    const response = await axios.post(`/users`, userData)
+    return response.data
+  } catch (error) {
+    throw error.response?.data || { message: "Kullanıcı oluşturulurken bir hata oluştu." }
+  }
+}
+
 export const getUserById = async (userId) => {
   try {
     const response = await api.get(`/users/${userId}`);
@@ -25,6 +36,7 @@ export const getUserById = async (userId) => {
 
 export const updateUser = async (userId, userData) => {
   try {
+    debugger;
     const response = await api.put(`/users/${userId}`, userData);
     return response.data;
   } catch (error) {
