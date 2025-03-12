@@ -1,16 +1,16 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import SwichDarkMode from "../../assets/SwichDarkMode.svg";
 import Swich from "../../assets/Swich.svg";
 import tetraHGS from "../../assets/tetrahgs.png";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import Modal from "../UI/Modal";
 
 const Header = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const { auth, logout } = useAuth();
+  const { auth, logout } = useAuth()
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

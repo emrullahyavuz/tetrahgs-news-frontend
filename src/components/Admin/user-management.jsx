@@ -7,17 +7,20 @@ export default function UserManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const data = await getUsers();
-      setUsers(data);
+      setUsers(data.users);
       setError(null);
     } catch (err) {
       setError("Kullanıcıları yüklerken bir hata oluştu.");
@@ -29,8 +32,9 @@ export default function UserManagement() {
     useEffect(() => {
       fetchUsers();
     }, []);
-
+    
     console.log(users)
+    console.log(Array.isArray(users))
 
   const handleDeleteUser = async (userId) => {
     if (window.confirm("Bu kullanıcıyı silmek istediğinizden emin misiniz?")) {
@@ -45,16 +49,25 @@ export default function UserManagement() {
     }
   };
 
+  const handleSearch = ({target:{value}}) => {
+    setSearchTerm(value)
+  }
+  
+  const filteredUsers = users.filter((user) => (
+    user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+  ))
+
+  console.log(filteredUsers)
   
   const handleEdit = (user) => {
     setSelectedUser(user);
     setIsAddModalOpen(true);
   };
   
-  const handleDelete = (user) => {
-    setSelectedUser(user);
-    setIsDeleteModalOpen(true);
-  };
+  // const handleDelete = (user) => {
+  //   setSelectedUser(user);
+  //   setIsDeleteModalOpen(true);
+  // };
   if (loading) return <div>Yükleniyor...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
@@ -81,6 +94,7 @@ export default function UserManagement() {
             <input
               type="text"
               placeholder="Kullanıcı ara..."
+              onChange={handleSearch}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <Search
@@ -156,7 +170,7 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -207,7 +221,7 @@ export default function UserManagement() {
                     {user.lastLogin}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.articles}
+                    {user.articles ? user.articles : 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -218,7 +232,7 @@ export default function UserManagement() {
                     </button>
                     <button
                       className="text-red-600 hover:text-red-900"
-                      onClick={() => handleDelete(user)}
+                      onClick={() => handleDeleteUser(user.id)}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -267,7 +281,7 @@ export default function UserManagement() {
                           type="text"
                           id="name"
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          defaultValue={selectedUser?.name || ""}
+                          defaultValue={selectedUser?.fullNname || ""}
                         />
                       </div>
                       <div>
