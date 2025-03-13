@@ -178,8 +178,10 @@ export default function UserManagement() {
           userType: formData.userType,
           status: formData.status,
         };
+        
 
         const response = await createUser(userData);
+       
 
         // Add the new user to the local state
         const newUser = response.user || response;

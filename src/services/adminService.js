@@ -1,6 +1,7 @@
-// src/services/adminService.js
+import api from './api'; 
 
-import api from './api'; // Axios instance'ı
+
+
 
 // Kullanıcı Yönetimi
 export const getUsers = async () => {
@@ -14,13 +15,41 @@ export const getUsers = async () => {
 };
 
 // Create user
+// export const createUser = async (userData) => {
+//   try {
+//     debugger;
+//     const response = await axios.post(`/users`, userData)
+    
+//     return response.data
+//   } catch (error) {
+    
+//     throw error.response?.data || { message: "Kullanıcı oluşturulurken bir hata oluştu." }
+//   }
+// }
+
+// Create user
 export const createUser = async (userData) => {
   try {
-    console.log(userData)
-    const response = await axios.post(`/users`, userData)
+    debugger;
+    
+    const requestData = {
+     
+      fullName: userData.fullName,
+      email: userData.email,
+      password: userData.password,
+      gender: userData.gender,
+      userType: userData.userType,
+      status: userData.status,
+    }
+
+    const response = await api.post(`/users`, requestData)
     return response.data
   } catch (error) {
-    throw error.response?.data || { message: "Kullanıcı oluşturulurken bir hata oluştu." }
+    console.error("Hata Detayı:", error);
+    if (error.response && error.response.data) {
+      throw error.response.data
+    }
+    throw { message: "Kullanıcı oluşturulurken bir hata oluştu." }
   }
 }
 
