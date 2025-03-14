@@ -13,6 +13,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react"
+import { useComments } from "../context/CommentContext"
+import { useAuth } from "../context/AuthContext" // Kullanıcı kimlik doğrulama için
 
 // Star Rating Component
 const StarRating = ({ rating }) => {
@@ -35,7 +37,7 @@ const StarRating = ({ rating }) => {
 }
 
 // Comment Component
-const Comment = ({ comment }) => {
+const Comment = ({ comment, onLike, onReply, onDelete, isOwner }) => {
   return (
     <div className="border-b border-gray-200 dark:border-gray-800 py-6 last:border-0">
       <div className="flex items-start">
@@ -49,15 +51,31 @@ const Comment = ({ comment }) => {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-1">
             <h4 className="font-medium text-gray-900 dark:text-white">{comment.author}</h4>
-            <span className="text-sm text-gray-500">{comment.date}</span>
+            <span className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
           </div>
           <p className="text-gray-700 dark:text-gray-300 mb-3">{comment.content}</p>
           <div className="flex items-center gap-4">
-            <button className="inline-flex items-center text-gray-500 hover:text-[#4B6BFB] transition-colors">
+            <button
+              onClick={() => onLike(comment.id)}
+              className="inline-flex items-center text-gray-500 hover:text-[#4B6BFB] transition-colors"
+            >
               <ThumbsUp className="w-4 h-4 mr-1" />
-              <span className="text-sm">{comment.likes}</span>
+              <span className="text-sm">{comment.likes || 0}</span>
             </button>
-            <button className="text-sm text-gray-500 hover:text-[#4B6BFB] transition-colors">Reply</button>
+            <button
+              onClick={() => onReply(comment)}
+              className="text-sm text-gray-500 hover:text-[#4B6BFB] transition-colors"
+            >
+              Reply
+            </button>
+            {isOwner && (
+              <button
+                onClick={() => onDelete(comment.id)}
+                className="text-sm text-red-500 hover:text-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -101,22 +119,47 @@ const BlogDetail = () => {
   const [blog, setBlog] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [comments, setComments] = useState([])
-  const [newComment, setNewComment] = useState("")
   const [relatedArticles, setRelatedArticles] = useState([])
   const [showAllComments, setShowAllComments] = useState(false)
+  const [replyTo, setReplyTo] = useState(null)
+
+  // Yorum context'inden gerekli fonksiyonları al
+  const {
+    comments,
+    loading: commentsLoading,
+    error: commentsError,
+    fetchComments,
+    addComment,
+    removeComment,
+    likeComment,
+  } = useComments()
+
+  // Auth context'inden kullanıcı bilgilerini al
+  const { user, isAuthenticated } = useAuth()
 
   // Form state for new comment
+  const [commentContent, setCommentContent] = useState("")
   const [commentName, setCommentName] = useState("")
   const [commentEmail, setCommentEmail] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState("")
 
   useEffect(() => {
-    // In a real application, you would fetch the blog data from an API
-    const fetchBlog = async () => {
+    // Kullanıcı giriş yapmışsa, form alanlarını doldur
+    if (isAuthenticated && user) {
+      setCommentName(user.fullName || user.name || "")
+      setCommentEmail(user.email || "")
+    }
+  }, [isAuthenticated, user])
+
+  useEffect(() => {
+    // Blog ve yorumları yükle
+    const fetchBlogAndComments = async () => {
       try {
         setLoading(true)
 
-        // Simulate API call
+        // Gerçek API'den blog verilerini çek
+        // Şimdilik mock veri kullanıyoruz
         const response = await new Promise((resolve) => {
           setTimeout(() => {
             resolve({
@@ -203,57 +246,10 @@ const BlogDetail = () => {
 
         setBlog(response)
 
-        // Fetch mock comments
-        const mockComments = [
-          {
-            id: 1,
-            author: "Sarah Johnson",
-            avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-            date: "Apr 2, 2023",
-            content:
-              "This article was incredibly helpful! I've been struggling with responsive card layouts and this cleared up a lot of my confusion. The examples are clear and easy to follow.",
-            likes: 12,
-          },
-          {
-            id: 2,
-            author: "Michael Chen",
-            avatar: "https://randomuser.me/api/portraits/men/67.jpg",
-            date: "Apr 5, 2023",
-            content:
-              "Great tutorial! I especially appreciated the section on optimizing for performance. Too many tutorials skip that part, but it's crucial for real-world applications.",
-            likes: 8,
-          },
-          {
-            id: 3,
-            author: "Emily Rodriguez",
-            avatar: "https://randomuser.me/api/portraits/women/33.jpg",
-            date: "Apr 10, 2023",
-            content:
-              "I implemented this approach in my current project and it worked perfectly. The grid system explanation was particularly helpful.",
-            likes: 5,
-          },
-          {
-            id: 4,
-            author: "David Kim",
-            avatar: "https://randomuser.me/api/portraits/men/22.jpg",
-            date: "Apr 15, 2023",
-            content: "Would love to see a follow-up article on how to add animations to these card layouts!",
-            likes: 3,
-          },
-          {
-            id: 5,
-            author: "Lisa Wang",
-            avatar: "https://randomuser.me/api/portraits/women/67.jpg",
-            date: "Apr 18, 2023",
-            content:
-              "The code examples were clear and concise. I appreciate how you explained the reasoning behind each design decision.",
-            likes: 7,
-          },
-        ]
+        // Yorumları API'den çek
+        await fetchComments(id)
 
-        setComments(mockComments)
-
-        // Fetch related articles
+        // İlgili makaleleri çek (mock veri)
         const mockRelatedArticles = [
           {
             id: "5",
@@ -282,6 +278,7 @@ const BlogDetail = () => {
         ]
 
         setRelatedArticles(mockRelatedArticles)
+        setError(null)
       } catch (err) {
         setError("Haber yüklenemedi. Lütfen daha sonra tekrar deneyin.")
         console.error(err)
@@ -290,29 +287,83 @@ const BlogDetail = () => {
       }
     }
 
-    fetchBlog()
+    fetchBlogAndComments()
     // Scroll to top when navigating to a new blog post
     window.scrollTo(0, 0)
-  }, [id])
+  }, [id, fetchComments])
 
-  const handleCommentSubmit = (e) => {
+  // Yorum gönderme işlemi
+  const handleCommentSubmit = async (e) => {
     e.preventDefault()
 
-    if (!newComment.trim() || !commentName.trim()) return
-
-    const newCommentObj = {
-      id: comments.length + 1,
-      author: commentName,
-      avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? "men" : "women"}/${Math.floor(Math.random() * 100)}.jpg`,
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      content: newComment,
-      likes: 0,
+    // Form doğrulama
+    if (!commentContent.trim()) {
+      setFormError("Yorum içeriği boş olamaz.")
+      return
     }
 
-    setComments([newCommentObj, ...comments])
-    setNewComment("")
-    setCommentName("")
-    setCommentEmail("")
+    if (!isAuthenticated && !commentName.trim()) {
+      setFormError("İsim alanı zorunludur.")
+      return
+    }
+
+    setIsSubmitting(true)
+    setFormError("")
+
+    try {
+      // Yorum verilerini hazırla
+      const commentData = {
+        content: commentContent,
+        parentId: replyTo ? replyTo.id : null,
+      }
+
+      // Kullanıcı giriş yapmamışsa, isim ve e-posta bilgilerini ekle
+      if (!isAuthenticated) {
+        commentData.author = commentName
+        commentData.email = commentEmail
+      }
+
+      // Yorumu API'ye gönder
+      await addComment(id, commentData)
+
+      // Form alanlarını temizle
+      setCommentContent("")
+      setReplyTo(null)
+
+      // Kullanıcı giriş yapmamışsa, isim ve e-posta alanlarını da temizle
+      if (!isAuthenticated) {
+        setCommentName("")
+        setCommentEmail("")
+      }
+    } catch (err) {
+      setFormError(err.message || "Yorum gönderilirken bir hata oluştu.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Yoruma beğeni ekle
+  const handleLikeComment = (commentId) => {
+    likeComment(commentId)
+  }
+
+  // Yoruma yanıt ver
+  const handleReplyComment = (comment) => {
+    setReplyTo(comment)
+    // Yorum formuna scroll
+    document.getElementById("comment-form").scrollIntoView({ behavior: "smooth" })
+  }
+
+  // Yorumu sil
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm("Bu yorumu silmek istediğinizden emin misiniz?")) {
+      try {
+        await removeComment(commentId)
+      } catch (err) {
+        console.error("Yorum silinirken hata oluştu:", err)
+        alert(err.message || "Yorum silinirken bir hata oluştu.")
+      }
+    }
   }
 
   const displayedComments = showAllComments ? comments : comments.slice(0, 3)
@@ -366,7 +417,7 @@ const BlogDetail = () => {
           {/* Back Button */}
           <Link to="/" className="inline-flex items-center text-[#4B6BFB] mb-6 hover:underline">
             <ArrowLeft size={18} className="mr-2" />
-           <span className="text-[#F7A91E]">Back to all articles</span>
+            <span className="text-[#F7A91E]">Back to all articles</span>
           </Link>
 
           {/* Blog Header */}
@@ -459,42 +510,58 @@ const BlogDetail = () => {
                 <h3 className="text-xl font-semibold mb-6 dark:text-white">Comments ({comments.length})</h3>
 
                 {/* Comment Form */}
-                <div className="mb-8 bg-gray-50 dark:bg-[#0D1117] p-6 rounded-xl">
-                  <h4 className="text-lg font-medium mb-4 dark:text-white">Leave a comment</h4>
-                  <form onSubmit={handleCommentSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label
-                          htmlFor="name"
-                          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                          Name *
-                        </label>
-                        <input
-                          type="text"
-                          id="name"
-                          value={commentName}
-                          onChange={(e) => setCommentName(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#4B6BFB] focus:border-transparent dark:bg-[#181A2A] dark:text-white"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="email"
-                          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                          Email (will not be published)
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          value={commentEmail}
-                          onChange={(e) => setCommentEmail(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#4B6BFB] focus:border-transparent dark:bg-[#181A2A] dark:text-white"
-                        />
-                      </div>
+                <div id="comment-form" className="mb-8 bg-gray-50 dark:bg-[#0D1117] p-6 rounded-xl">
+                  <h4 className="text-lg font-medium mb-4 dark:text-white">
+                    {replyTo ? `Reply to ${replyTo.author}` : "Leave a comment"}
+                  </h4>
+
+                  {replyTo && (
+                    <div className="mb-4 p-3 bg-gray-100 dark:bg-[#181A2A] rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 italic">"{replyTo.content}"</p>
+                      <button onClick={() => setReplyTo(null)} className="text-xs text-[#4B6BFB] mt-2 hover:underline">
+                        Cancel Reply
+                      </button>
                     </div>
+                  )}
+
+                  {formError && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">{formError}</div>}
+
+                  <form onSubmit={handleCommentSubmit}>
+                    {!isAuthenticated && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label
+                            htmlFor="name"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                          >
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            id="name"
+                            value={commentName}
+                            onChange={(e) => setCommentName(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#4B6BFB] focus:border-transparent dark:bg-[#181A2A] dark:text-white"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="email"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                          >
+                            Email (will not be published)
+                          </label>
+                          <input
+                            type="email"
+                            id="email"
+                            value={commentEmail}
+                            onChange={(e) => setCommentEmail(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#4B6BFB] focus:border-transparent dark:bg-[#181A2A] dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    )}
                     <div className="mb-4">
                       <label
                         htmlFor="comment"
@@ -505,28 +572,63 @@ const BlogDetail = () => {
                       <textarea
                         id="comment"
                         rows={4}
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
+                        value={commentContent}
+                        onChange={(e) => setCommentContent(e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#4B6BFB] focus:border-transparent dark:bg-[#181A2A] dark:text-white"
                         required
                       />
                     </div>
                     <button
                       type="submit"
-                      className="inline-flex items-center px-6 py-3 bg-[#F7A91E]  rounded-lg transition-colors"
+                      disabled={isSubmitting}
+                      className={`inline-flex items-center px-6 py-3 bg-[#F7A91E] rounded-lg transition-colors ${
+                        isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                      }`}
                     >
-                      <Send className="w-4 h-4 mr-2 text-[#231F20]" />
-                     <span className="text-[#231F20] hover:text-white "> Post Comment</span>
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#231F20] mr-2"></div>
+                          <span className="text-[#231F20]">Submitting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2 text-[#231F20]" />
+                          <span className="text-[#231F20] hover:text-white">Post Comment</span>
+                        </>
+                      )}
                     </button>
                   </form>
                 </div>
 
+                {/* Comments Loading State */}
+                {commentsLoading && (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4B6BFB]"></div>
+                  </div>
+                )}
+
+                {/* Comments Error State */}
+                {commentsError && <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-6">{commentsError}</div>}
+
                 {/* Comments List */}
-                <div className="space-y-0">
-                  {displayedComments.map((comment) => (
-                    <Comment key={comment.id} comment={comment} />
-                  ))}
-                </div>
+                {!commentsLoading && comments.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">No comments yet. Be the first to comment!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-0">
+                    {displayedComments.map((comment) => (
+                      <Comment
+                        key={comment.id}
+                        comment={comment}
+                        onLike={handleLikeComment}
+                        onReply={handleReplyComment}
+                        onDelete={handleDeleteComment}
+                        isOwner={isAuthenticated && user && (user.id === comment.userId || user.userType === "admin")}
+                      />
+                    ))}
+                  </div>
+                )}
 
                 {/* Show More Comments Button */}
                 {comments.length > 3 && (
@@ -587,8 +689,6 @@ const BlogDetail = () => {
                 </div>
               </div>
 
-             
-
               {/* Tags Card */}
               <div className="bg-white dark:bg-[#181A2A] rounded-xl shadow-sm p-6">
                 <h3 className="font-medium text-lg text-gray-900 dark:text-white mb-4">Popular Tags</h3>
@@ -628,3 +728,4 @@ const BlogDetail = () => {
 }
 
 export default BlogDetail
+

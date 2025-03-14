@@ -1,37 +1,39 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import SwichDarkMode from "../../assets/SwichDarkMode.svg";
-import Swich from "../../assets/Swich.svg";
-import tetraHGS from "../../assets/tetrahgs.png";
-import { useAuth } from "../../hooks/useAuth";
-import Modal from "../UI/Modal";
+import { useEffect, useState } from "react"
+import { Link, NavLink, useNavigate } from "react-router-dom"
+import SwichDarkMode from "../../assets/SwichDarkMode.svg"
+import Swich from "../../assets/Swich.svg"
+import tetraHGS from "../../assets/tetrahgs.png"
+import { useAuth } from "../../context/AuthContext"
+import Modal from "../UI/Modal"
 
 const Header = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const { auth, logout } = useAuth()
+  const [darkMode, setDarkMode] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const { user, isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate()
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+    setIsMenuOpen(!isMenuOpen)
+  }
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
+    setDarkMode(!darkMode)
+  }
 
   useEffect(() => {
     if (darkMode) {
-      document.body.classList.add("dark");
+      document.body.classList.add("dark")
     } else {
-      document.body.classList.remove("dark");
+      document.body.classList.remove("dark")
     }
-  }, [darkMode]);
+  }, [darkMode])
 
   const handleLogout = () => {
-    logout();
-    
-  };
+    logout()
+    setShowModal(false)
+    navigate("/")
+  }
 
   return (
     <header className="flex justify-between items-center max-w-6xl mx-auto px-4 md:py-16 md:px-4 py-8 mb-10 w-full h-[100px]">
@@ -40,7 +42,7 @@ const Header = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 w-[158px] h-[36px]">
           <img
-            src={tetraHGS}
+            src={tetraHGS || "/placeholder.svg"}
             alt="Theme toggle"
             width={80}
             height={80}
@@ -54,34 +56,19 @@ const Header = () => {
 
       {/* Main Navigation */}
       <nav className="hidden md:flex items-center space-x-10 py-[6px] font-work-sans text-[#3B3C4A] dark:text-white ">
-        <NavLink
-          to="/"
-          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
-        >
+        <NavLink to="/" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
           Home
         </NavLink>
-        <NavLink
-          to="/blog"
-          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
-        >
+        <NavLink to="/blog" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
           Blog
         </NavLink>
-        <NavLink
-          to="/technology"
-          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
-        >
+        <NavLink to="/technology" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
           Teknolojik Haberler
         </NavLink>
-        <NavLink
-          to="/about"
-          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
-        >
+        <NavLink to="/about" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
           About
         </NavLink>
-        <NavLink
-          to="/contact"
-          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
-        >
+        <NavLink to="/contact" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
           Contact
         </NavLink>
       </nav>
@@ -101,13 +88,102 @@ const Header = () => {
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          {isMenuOpen ? (
-            <path d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          )}
+          {isMenuOpen ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
         </svg>
       </button>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-white dark:bg-[#0D1117] flex flex-col items-center justify-center">
+          <button
+            onClick={toggleMenu}
+            className="absolute top-4 right-4 p-2 rounded-md focus:outline-none"
+            aria-label="Menüyü kapat"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <nav className="flex flex-col items-center space-y-6 text-xl">
+            <NavLink to="/" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+              Home
+            </NavLink>
+            <NavLink to="/blog" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+              Blog
+            </NavLink>
+            <NavLink to="/technology" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+              Teknolojik Haberler
+            </NavLink>
+            <NavLink to="/about" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+              About
+            </NavLink>
+            <NavLink to="/contact" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+              Contact
+            </NavLink>
+            {isAuthenticated ? (
+              <button
+                onClick={() => {
+                  setShowModal(true)
+                  toggleMenu()
+                }}
+                className="flex items-center gap-2 hover:text-[#4B6BFB]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                <span>Çıkış</span>
+              </button>
+            ) : (
+              <Link to="/auth/login" className="flex items-center gap-2 hover:text-[#4B6BFB]" onClick={toggleMenu}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                  />
+                </svg>
+                <span>Giriş Yap</span>
+              </Link>
+            )}
+            <button onClick={toggleDarkMode} className="mt-4 flex items-center gap-2" aria-label="Toggle theme">
+              <img
+                src={darkMode ? SwichDarkMode : Swich}
+                alt="Theme toggle"
+                width={48}
+                height={28}
+                className="text-gray-600"
+              />
+              <span>{darkMode ? "Açık Mod" : "Koyu Mod"}</span>
+            </button>
+          </nav>
+        </div>
+      )}
 
       {/* Search and Theme Toggle */}
       <div className="flex items-center space-x-4 gap-10">
@@ -149,12 +225,14 @@ const Header = () => {
         </button>
 
         {/* Auth Buttons */}
-        {auth ? (
+        {isAuthenticated ? (
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 hover:text-gray-600"
-            >
+            <div className="hidden md:flex items-center gap-2">
+              <span className="text-gray-700 dark:text-gray-300">
+                Merhaba, {user?.fullName || user?.name || "Kullanıcı"}
+              </span>
+            </div>
+            <button onClick={() => setShowModal(true)} className="flex items-center gap-2 hover:text-gray-600">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -202,7 +280,8 @@ const Header = () => {
         />
       )}
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header
+

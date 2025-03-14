@@ -1,6 +1,8 @@
+"use client"
+
 import { useState, useEffect, useRef } from "react"
-import { Link } from "react-router-dom"
-import { useAuth } from "../../hooks/useAuth"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../../context/AuthContext" // AuthContext'ten useAuth hook'unu import ediyoruz
 import tetraHGS from "../../assets/tetrahgs.png"
 import {
   Bell,
@@ -18,7 +20,9 @@ import {
 } from "lucide-react"
 
 const AdminHeader = () => {
-  const { user, logout } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth() // AuthContext'ten gerekli değerleri alıyoruz
+  const navigate = useNavigate()
+
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -53,6 +57,13 @@ const AdminHeader = () => {
 
   const profileRef = useRef(null)
   const notificationsRef = useRef(null)
+
+  // Kullanıcı giriş yapmamışsa admin sayfasına erişimi engelle
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/auth/login", { replace: true })
+    }
+  }, [isAuthenticated, navigate])
 
   // Dark mode toggle
   useEffect(() => {
@@ -129,6 +140,17 @@ const AdminHeader = () => {
     }
   }
 
+  // Çıkış işlemi
+  const handleLogout = () => {
+    logout()
+    navigate("/auth/login") // Çıkış sonrası login sayfasına yönlendir
+  }
+
+  // Kullanıcı giriş yapmamışsa header'ı gösterme
+  if (!isAuthenticated) {
+    return null
+  }
+
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -147,7 +169,7 @@ const AdminHeader = () => {
                 )}
               </button>
               <Link to="/admin" className="flex items-center">
-                <img className="h-8 w-auto" src={tetraHGS} alt="Admin Panel Logo" />
+                <img className="h-8 w-auto" src={tetraHGS || "/placeholder.svg"} alt="Admin Panel Logo" />
                 <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white hidden sm:block">
                   TetraHaber Admin Panel
                 </span>
@@ -285,7 +307,7 @@ const AdminHeader = () => {
                     )}
                   </div>
                   <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">
-                    {user?.fullName || "Admin Kullanıcı"}
+                    {user?.fullName || user?.name || "Admin Kullanıcı"}
                   </span>
                   <ChevronDown className="ml-1 h-4 w-4 text-gray-500 dark:text-gray-400 hidden md:block" />
                 </button>
@@ -296,7 +318,7 @@ const AdminHeader = () => {
                   <div className="py-1">
                     <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {user?.fullName || "Admin Kullanıcı"}
+                        {user?.fullName || user?.name || "Admin Kullanıcı"}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                         {user?.email || "admin@example.com"}
@@ -317,7 +339,7 @@ const AdminHeader = () => {
                       Ayarlar
                     </Link>
                     <button
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
                     >
                       <LogOut className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
