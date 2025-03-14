@@ -1,9 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect } from "react"
-import axios from "axios"
-
-const API_URL = "http://localhost:5000/"
+import { loginUser, registerUser, getCurrentUser, forgotPassword, resetPassword } from "../services/authService"
 
 const AuthContext = createContext()
 
@@ -23,13 +21,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await axios.get(`${API_URL}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        setUser(response.data.user)
+        const response = await getCurrentUser(token)
+        setUser(response.user)
       } catch (err) {
         console.error("Auth check error:", err)
         localStorage.removeItem("token")
@@ -45,14 +38,14 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null)
-      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password })
+      const response = await loginUser(email, password)
 
-      localStorage.setItem("token", response.data.token)
-      setUser(response.data.user)
+      localStorage.setItem("token", response.token)
+      setUser(response.user)
 
-      return response.data
+      return response
     } catch (err) {
-      setError(err.response?.data?.message || "Giriş yapılırken bir hata oluştu.")
+      setError(err.message || "Giriş yapılırken bir hata oluştu.")
       throw err
     }
   }
@@ -67,14 +60,38 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setError(null)
-      const response = await axios.post(`${API_URL}/api/auth/register`, userData)
+      const response = await registerUser(userData)
 
-      localStorage.setItem("token", response.data.token)
-      setUser(response.data.user)
+      localStorage.setItem("token", response.token)
+      setUser(response.user)
 
-      return response.data
+      return response
     } catch (err) {
-      setError(err.response?.data?.message || "Kayıt olurken bir hata oluştu.")
+      setError(err.message || "Kayıt olurken bir hata oluştu.")
+      throw err
+    }
+  }
+
+  // Şifremi unuttum
+  const requestPasswordReset = async (email) => {
+    try {
+      setError(null)
+      const response = await forgotPassword(email)
+      return response
+    } catch (err) {
+      setError(err.message || "Şifre sıfırlama isteği gönderilirken bir hata oluştu.")
+      throw err
+    }
+  }
+
+  // Şifre sıfırlama
+  const resetUserPassword = async (token, password) => {
+    try {
+      setError(null)
+      const response = await resetPassword(token, password)
+      return response
+    } catch (err) {
+      setError(err.message || "Şifre sıfırlanırken bir hata oluştu.")
       throw err
     }
   }
@@ -89,6 +106,8 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         register,
+        requestPasswordReset,
+        resetUserPassword,
       }}
     >
       {children}

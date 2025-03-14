@@ -147,9 +147,9 @@ const Login = () => {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-[#4B6BFB] hover:text-[#4B6BFB]/80">
+              <Link to="/auth/forgot-password" className="font-medium text-[#4B6BFB] hover:text-[#4B6BFB]/80">
                 Şifrenizi mi unuttunuz?
-              </a>
+              </Link>
             </div>
           </div>
 

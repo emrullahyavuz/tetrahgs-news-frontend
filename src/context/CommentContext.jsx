@@ -1,5 +1,3 @@
-"use client"
-
 import { createContext, useContext, useState } from "react"
 import { getCommentsByNewsId, createComment, updateComment, deleteComment } from "../services/commentService"
 
