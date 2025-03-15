@@ -156,6 +156,7 @@ export default function UserManagement() {
           email: formData.email,
           gender: formData.gender,
           userType: formData.userType,
+          status: formData.status,
         };
 
         const response = await updateUser(selectedUser.id, userData);
