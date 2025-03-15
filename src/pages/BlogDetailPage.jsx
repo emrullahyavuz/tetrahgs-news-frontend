@@ -136,6 +136,7 @@ const BlogDetail = () => {
 
   // Auth context'inden kullanıcı bilgilerini al
   const { user, isAuthenticated } = useAuth()
+  
 
   // Form state for new comment
   const [commentContent, setCommentContent] = useState("")
@@ -156,7 +157,7 @@ const BlogDetail = () => {
     // Blog ve yorumları yükle
     const fetchBlogAndComments = async () => {
       try {
-        setLoading(true)
+        setLoading(false)
 
         // Gerçek API'den blog verilerini çek
         // Şimdilik mock veri kullanıyoruz

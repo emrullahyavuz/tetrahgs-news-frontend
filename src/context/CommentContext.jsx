@@ -1,103 +1,115 @@
-import { createContext, useContext, useState } from "react"
-import { getCommentsByNewsId, createComment, updateComment, deleteComment } from "../services/commentService"
+import { createContext, useContext, useState, useEffect, useRef } from "react";
+import {
+  getCommentsByNewsId,
+  createComment,
+  updateComment,
+  deleteComment,
+} from "../services/commentService";
 
-const CommentContext = createContext()
+const CommentContext = createContext();
 
 export const CommentProvider = ({ children }) => {
-  const [comments, setComments] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const fetchedNewsIds = useRef(new Set()); // Daha önce istek yapılan haber ID'lerini saklar
 
-  // Haber ID'sine göre yorumları getir
+  // Haber ID'sine göre yorumları getir (tekrarlanan istekleri önlemek için)
   const fetchComments = async (newsId) => {
+    if (!newsId || fetchedNewsIds.current.has(newsId)) return; // Zaten bu haber için istek yapıldıysa tekrar yapma
+
     try {
-      setLoading(true)
-      setError(null)
-      const response = await getCommentsByNewsId(newsId)
-      setComments(response.comments || [])
-      return response.comments || []
+      setLoading(true);
+      setError(null);
+      fetchedNewsIds.current.add(newsId); // İstek yapılan haber ID'yi kaydet
+
+      const response = await getCommentsByNewsId(newsId);
+      setComments(response.comments || []);
+
+      return response.comments || [];
     } catch (err) {
-      setError(err.message || "Yorumlar yüklenirken bir hata oluştu.")
-      return []
+      setError(err.message || "Yorumlar yüklenirken bir hata oluştu.");
+      return [];
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Yeni yorum ekle
   const addComment = async (newsId, commentData) => {
     try {
-      setLoading(true)
-      setError(null)
-      const response = await createComment({
-        newsId,
-        ...commentData,
-      })
+      setLoading(true);
+      setError(null);
+      debugger;
+      const response = await createComment({ newsId, ...commentData });
 
-      // Yeni yorumu listeye ekle
       if (response.comment) {
-        setComments((prevComments) => [response.comment, ...prevComments])
+        setComments((prevComments) => [response.comment, ...prevComments]);
       }
 
-      return response
+      return response;
     } catch (err) {
-      setError(err.message || "Yorum eklenirken bir hata oluştu.")
-      throw err
+      setError(err.message || "Yorum eklenirken bir hata oluştu.");
+      throw err;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Yorumu güncelle
   const editComment = async (commentId, commentData) => {
     try {
-      setLoading(true)
-      setError(null)
-      const response = await updateComment(commentId, commentData)
+      setLoading(true);
+      setError(null);
+      const response = await updateComment(commentId, commentData);
 
-      // Yorumu listede güncelle
       if (response.comment) {
         setComments((prevComments) =>
-          prevComments.map((comment) => (comment.id === commentId ? response.comment : comment)),
-        )
+          prevComments.map((comment) =>
+            comment.id === commentId ? response.comment : comment
+          )
+        );
       }
 
-      return response
+      return response;
     } catch (err) {
-      setError(err.message || "Yorum güncellenirken bir hata oluştu.")
-      throw err
+      setError(err.message || "Yorum güncellenirken bir hata oluştu.");
+      throw err;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Yorumu sil
   const removeComment = async (commentId) => {
     try {
-      setLoading(true)
-      setError(null)
-      await deleteComment(commentId)
+      setLoading(true);
+      setError(null);
+      await deleteComment(commentId);
 
-      // Yorumu listeden kaldır
-      setComments((prevComments) => prevComments.filter((comment) => comment.id !== commentId))
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment.id !== commentId)
+      );
 
-      return { success: true }
+      return { success: true };
     } catch (err) {
-      setError(err.message || "Yorum silinirken bir hata oluştu.")
-      throw err
+      setError(err.message || "Yorum silinirken bir hata oluştu.");
+      throw err;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  // Yoruma beğeni ekle (frontend'de simüle edilmiş)
+  // Yoruma beğeni ekle
   const likeComment = (commentId) => {
     setComments((prevComments) =>
       prevComments.map((comment) =>
-        comment.id === commentId ? { ...comment, likes: (comment.likes || 0) + 1 } : comment,
-      ),
-    )
-  }
+        comment.id === commentId
+          ? { ...comment, likes: (comment.likes || 0) + 1 }
+          : comment
+      )
+    );
+  };
 
   return (
     <CommentContext.Provider
@@ -114,8 +126,7 @@ export const CommentProvider = ({ children }) => {
     >
       {children}
     </CommentContext.Provider>
-  )
-}
+  );
+};
 
-export const useComments = () => useContext(CommentContext)
-
+export const useComments = () => useContext(CommentContext);

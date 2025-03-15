@@ -19,6 +19,7 @@ export const getAllComments = async () => {
 // Haber ID'sine göre yorumları getir (Public)
 export const getCommentsByNewsId = async (newsId) => {
   try {
+    
     const response = await axios.get(`${API_URL}/api/comments/news/${newsId}`)
     return response.data
   } catch (error) {
@@ -57,6 +58,7 @@ export const getUserComments = async () => {
 // Yorum oluştur (Private)
 export const createComment = async (commentData) => {
   try {
+    debugger;
     const response = await axios.post(`${API_URL}/api/comments`, commentData, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,

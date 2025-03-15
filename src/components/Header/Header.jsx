@@ -1,39 +1,39 @@
-import { useEffect, useState } from "react"
-import { Link, NavLink, useNavigate } from "react-router-dom"
-import SwichDarkMode from "../../assets/SwichDarkMode.svg"
-import Swich from "../../assets/Swich.svg"
-import tetraHGS from "../../assets/tetrahgs.png"
-import { useAuth } from "../../context/AuthContext"
-import Modal from "../UI/Modal"
+import { useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import SwichDarkMode from "../../assets/SwichDarkMode.svg";
+import Swich from "../../assets/Swich.svg";
+import tetraHGS from "../../assets/tetrahgs.png";
+import { useAuth } from "../../context/AuthContext";
+import Modal from "../UI/Modal";
 
 const Header = () => {
-  const [darkMode, setDarkMode] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [showModal, setShowModal] = useState(false)
-  const { user, isAuthenticated, logout } = useAuth()
-  const navigate = useNavigate()
+  const [darkMode, setDarkMode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
-  }
+    setDarkMode(!darkMode);
+  };
 
   useEffect(() => {
     if (darkMode) {
-      document.body.classList.add("dark")
+      document.body.classList.add("dark");
     } else {
-      document.body.classList.remove("dark")
+      document.body.classList.remove("dark");
     }
-  }, [darkMode])
+  }, [darkMode]);
 
   const handleLogout = () => {
-    logout()
-    setShowModal(false)
-    navigate("/")
-  }
+    logout();
+    setShowModal(false);
+    navigate("/");
+  };
 
   return (
     <header className="flex justify-between items-center max-w-6xl mx-auto px-4 md:py-16 md:px-4 py-8 mb-10 w-full h-[100px]">
@@ -56,21 +56,32 @@ const Header = () => {
 
       {/* Main Navigation */}
       <nav className="hidden md:flex items-center space-x-10 py-[6px] font-work-sans text-[#3B3C4A] dark:text-white ">
-        <NavLink to="/" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        <NavLink
+          to="/"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           Home
         </NavLink>
-        <NavLink to="/blog" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
-          Blog
-        </NavLink>
-        <NavLink to="/technology" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+
+        <NavLink
+          to="/technology"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           Teknolojik Haberler
         </NavLink>
-        <NavLink to="/about" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        <NavLink
+          to="/about"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           About
         </NavLink>
-        <NavLink to="/contact" className="hover:text-gray-900 dark:hover:text-[#4B6BFB]">
+        <NavLink
+          to="/contact"
+          className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
+        >
           Contact
         </NavLink>
+        <NavLink to="/admin/dashboard">Admin Dashboard</NavLink>
       </nav>
 
       {/* Hamburger Menü Butonu */}
@@ -88,7 +99,11 @@ const Header = () => {
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          {isMenuOpen ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
+          {isMenuOpen ? (
+            <path d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          )}
         </svg>
       </button>
 
@@ -113,26 +128,46 @@ const Header = () => {
             </svg>
           </button>
           <nav className="flex flex-col items-center space-y-6 text-xl">
-            <NavLink to="/" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+            <NavLink
+              to="/"
+              className="hover:text-[#4B6BFB]"
+              onClick={toggleMenu}
+            >
               Home
             </NavLink>
-            <NavLink to="/blog" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+            <NavLink
+              to="/blog"
+              className="hover:text-[#4B6BFB]"
+              onClick={toggleMenu}
+            >
               Blog
             </NavLink>
-            <NavLink to="/technology" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+            <NavLink
+              to="/technology"
+              className="hover:text-[#4B6BFB]"
+              onClick={toggleMenu}
+            >
               Teknolojik Haberler
             </NavLink>
-            <NavLink to="/about" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+            <NavLink
+              to="/about"
+              className="hover:text-[#4B6BFB]"
+              onClick={toggleMenu}
+            >
               About
             </NavLink>
-            <NavLink to="/contact" className="hover:text-[#4B6BFB]" onClick={toggleMenu}>
+            <NavLink
+              to="/contact"
+              className="hover:text-[#4B6BFB]"
+              onClick={toggleMenu}
+            >
               Contact
             </NavLink>
             {isAuthenticated ? (
               <button
                 onClick={() => {
-                  setShowModal(true)
-                  toggleMenu()
+                  setShowModal(true);
+                  toggleMenu();
                 }}
                 className="flex items-center gap-2 hover:text-[#4B6BFB]"
               >
@@ -153,7 +188,11 @@ const Header = () => {
                 <span>Çıkış</span>
               </button>
             ) : (
-              <Link to="/auth/login" className="flex items-center gap-2 hover:text-[#4B6BFB]" onClick={toggleMenu}>
+              <Link
+                to="/auth/login"
+                className="flex items-center gap-2 hover:text-[#4B6BFB]"
+                onClick={toggleMenu}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -171,7 +210,12 @@ const Header = () => {
                 <span>Giriş Yap</span>
               </Link>
             )}
-            <button onClick={toggleDarkMode} className="mt-4 flex items-center gap-2" aria-label="Toggle theme">
+            
+            <button
+              onClick={toggleDarkMode}
+              className="mt-4 flex items-center gap-2"
+              aria-label="Toggle theme"
+            >
               <img
                 src={darkMode ? SwichDarkMode : Swich}
                 alt="Theme toggle"
@@ -232,7 +276,10 @@ const Header = () => {
                 Merhaba, {user?.fullName || user?.name || "Kullanıcı"}
               </span>
             </div>
-            <button onClick={() => setShowModal(true)} className="flex items-center gap-2 hover:text-gray-600">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 hover:text-gray-600"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -280,8 +327,7 @@ const Header = () => {
         />
       )}
     </header>
-  )
-}
+  );
+};
 
-export default Header
-
+export default Header;

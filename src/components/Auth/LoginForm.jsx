@@ -13,7 +13,7 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loginError, setLoginError] = useState("")
 
-  const { login } = useAuth()
+  const  {login}  = useAuth()
   const navigate = useNavigate()
 
   const handleChange = (e) => {

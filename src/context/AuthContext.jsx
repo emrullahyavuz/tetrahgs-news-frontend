@@ -38,8 +38,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null)
+      debugger;
       const response = await loginUser(email, password)
-
+      
       localStorage.setItem("token", response.token)
       setUser(response.user)
 

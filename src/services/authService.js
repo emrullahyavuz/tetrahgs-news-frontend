@@ -1,10 +1,11 @@
 import axios from "axios"
 
-const API_URL = "https://api.example.com"
+const API_URL = "http://localhost:5000"
 
 // Giriş yap
 export const loginUser = async (email, password) => {
   try {
+    debugger;
     const response = await axios.post(`${API_URL}/api/auth/login`, { email, password })
     return response.data
   } catch (error) {
