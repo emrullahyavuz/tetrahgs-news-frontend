@@ -2,7 +2,7 @@ import NewsCard from "./news-card";
 import FeaturedNews from "./featured-news";
 import Sidebar from "./sidebar";
 
-export default function TechNewsPage() {
+export default function NewsPage() {
   
 
   const newsItems = [
@@ -91,7 +91,7 @@ export default function TechNewsPage() {
   ];
 
   return (
-    <main className="container max-w-6xl mx-auto px-4 py-6">
+    <main className="container max-w-7xl mx-auto px-4 py-6">
       {/* Featured News */}
       <FeaturedNews news={featuredNews} />
 

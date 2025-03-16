@@ -3,5 +3,17 @@
 @tailwind utilities;
 
 .dark {
-    @apply bg-gray-900 text-white;
+  @apply bg-gray-900 text-white;
 }
+
+button {
+  @apply !bg-[#F7A91E] !text-[#231F20]
+}
+
+button:hover {
+  @apply !text-white duration-300 transition-all
+}
+
+/* body {
+  @apply text-[#231F20];
+} */

@@ -114,7 +114,7 @@ const RelatedArticleCard = ({ article }) => {
   )
 }
 
-const BlogDetail = () => {
+const NewsDetailPage = () => {
   const { id } = useParams()
   const [blog, setBlog] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -729,5 +729,5 @@ const BlogDetail = () => {
   )
 }
 
-export default BlogDetail
+export default NewsDetailPage
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Sun, Moon, Menu, X, ChevronDown } from "lucide-react";
+import { Sun, Moon, Menu, X, ChevronDown, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import tetraHGS from "../../assets/tetrahgs.png";
 import { useAuth } from "../../context/AuthContext";
@@ -9,6 +9,7 @@ import Modal from "../UI/Modal";
 const Header = () => {
   const [showModal, setShowModal] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   const [darkMode, setDarkMode] = useState(
@@ -56,14 +57,14 @@ const Header = () => {
           Home
         </NavLink>
 
-        <NavLink
+        <div
             className="relative"
             onMouseEnter={() => setShowCategories(true)}
             onMouseLeave={() => setShowCategories(false)}
           >
-            <button className="flex items-center text-gray-700 dark:text-gray-300 hover:text-blue-500">
+            <Link to="news" className="flex items-center text-gray-700 dark:text-gray-300 hover:text-blue-500">
               Haberler <ChevronDown className="ml-1" size={16} />
-            </button>
+            </Link>
             {showCategories && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -78,7 +79,7 @@ const Header = () => {
                 </ul>
               </motion.div>
             )}
-          </NavLink>
+          </div>
         <NavLink
           to="/about"
           className="hover:text-gray-900 dark:hover:text-[#4B6BFB]"
@@ -97,26 +98,29 @@ const Header = () => {
       {/* Search and Theme Toggle */}
       <div className="flex items-center space-x-4 gap-10">
         {/* Search Bar */}
-        <div className="relative md:block hidden">
-          <input
-            type="search"
-            placeholder="Search"
-            className="pl-5 pr-4 py-2 w-[166px] h-[36px] border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#242535] border-none dark:text-[#A1A1AA] [&::-webkit-search-cancel-button]:hidden"
-          />
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            <svg
-              className="w-4 h-4 text-[#52525B]"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-        </div>
+        <div className="relative">
+      <div
+        className="flex items-center space-x-2 cursor-pointer"
+        onMouseEnter={() => setIsOpen(true)}
+        
+      >
+        <Search className="w-5 h-5 text-[#52525B]" />
+      </div>
+      <motion.div
+        initial={{ width: 0, opacity: 0 }}
+        animate={{ width: isOpen ? 180 : 0, opacity: isOpen ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className={`absolute right-0 top-0 overflow-hidden ${
+          isOpen ? "border border-gray-300 dark:border-gray-700 rounded-lg" : ""
+        }`}
+      >
+        <input
+          type="search"
+          placeholder="Search"
+          className="pl-5 pr-4 py-2 w-[180px] h-[36px] bg-gray-100 focus:outline-none dark:bg-[#242535] dark:text-[#A1A1AA] border-none transition-all duration-300"
+        />
+      </motion.div>
+    </div>
 
         {/* Theme Toggle Button */}
         <div className="flex items-center space-x-4">
@@ -133,6 +137,8 @@ const Header = () => {
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
+
+        
 
         {/* Auth Buttons */}
         {isAuthenticated ? (

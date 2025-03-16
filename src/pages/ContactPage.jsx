@@ -1,117 +1,91 @@
-import React, { useState } from 'react';
-import Button from '../components/UI/Button';
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { motion } from "framer-motion";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { Mail, Phone, MapPin } from "lucide-react";
 
-const ContactPage = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
+const schema = yup.object().shape({
+  name: yup.string().required("Name is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  message: yup.string().min(10, "Message should be at least 10 characters").required("Message is required"),
+});
 
-  const handleChange = ({target:{name,value}}) => {
-    // const { name, value } = e.target;
-    
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+export default function ContactPage() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Form submission logic here
-    console.log('Form submitted:', formData);
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      message: '',
-    });
+  const onSubmit = (data) => {
+    console.log("Form Data:", data);
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-center mb-8">Bizimle İletişime Geçin!</h1>
-      <div className="flex flex-col md:flex-row items-center md:space-x-8">
-        <div className="md:w-1/2 mb-8 md:mb-0">
-          <h3 className="text-xl font-semibold mb-4">Adresimiz</h3>
-          <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
-            1234 Tetra Blog Street, Tetra Blog City, BC 12345
-          </p>
-          <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
-            <strong>Email:</strong> info@tetrablog.com
-          </p>
-          <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
-            <strong>Telefon:</strong> (123) 456-7890
-          </p>
-          <h3 className="text-xl font-semibold mb-4">Konum</h3>
-          <div className="w-full h-64 rounded-lg shadow-md">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509374!2d144.9537353153168!3d-37.81627977975195!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf577d1f9c3b1e0e!2sFederation%20Square!5e0!3m2!1sen!2sau!4v1611819446571!5m2!1sen!2sau"
-              width="100%"
-              height="100%"
-              frameBorder="0"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              aria-hidden="false"
-              tabIndex="0"
-            ></iframe>
+    <div className="max-w-4xl mx-auto p-6 space-y-10">
+      {/* Contact Info */}
+      <motion.div 
+        initial={{ opacity: 0, y: -50 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.5 }}
+        className="flex flex-col md:flex-row justify-between items-center md:items-start gap-6"
+      >
+        <div className="space-y-4">
+          <h2 className="text-3xl font-bold">Contact Us</h2>
+          <p className="text-gray-600 dark:text-gray-300">We'd love to hear from you! Get in touch with us.</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2"><Mail /> contact@example.com</div>
+            <div className="flex items-center gap-2"><Phone /> +123 456 7890</div>
+            <div className="flex items-center gap-2"><MapPin /> 123 Main Street, City, Country</div>
           </div>
         </div>
-        <div className="md:w-1/2">
-          <h3 className="text-xl font-semibold mb-4">Send Us a Message</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-lg font-medium text-gray-700 dark:text-gray-300">
-                İsim
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-[#242535] dark:border-[#3B3C4A] dark:text-gray-300"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-lg font-medium text-gray-700 dark:text-gray-300">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-[#242535] dark:border-[#3B3C4A] dark:text-gray-300"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="message" className="block text-lg font-medium text-gray-700 dark:text-gray-300">
-                Mesaj
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-[#242535] dark:border-[#3B3C4A] dark:text-gray-300"
-                rows="5"
-                required
-                
-              ></textarea>
-            </div>
-            <Button color="#F7A91E" textColor="#231F20" size="lg">
-                Mesajı Gönder
-            </Button>
-          </form>
-        </div>
-      </div>
+      </motion.div>
+
+      {/* Contact Form */}
+      <motion.form
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md space-y-4"
+      >
+        <input type="text" placeholder="Your Name" {...register("name")} className="w-full p-2 border rounded" />
+        <p className="text-red-500 text-sm">{errors.name?.message}</p>
+
+        <input type="email" placeholder="Your Email" {...register("email")} className="w-full p-2 border rounded" />
+        <p className="text-red-500 text-sm">{errors.email?.message}</p>
+
+        <textarea placeholder="Your Message" {...register("message")} className="w-full p-2 border rounded h-32"></textarea>
+        <p className="text-red-500 text-sm">{errors.message?.message}</p>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Send Message
+        </motion.button>
+      </motion.form>
+
+      {/* Map */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full h-64 rounded-lg overflow-hidden"
+      >
+        <MapContainer center={[51.505, -0.09]} zoom={13} className="h-full w-full">
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <Marker position={[51.505, -0.09]}>
+            <Popup>Our Office Location</Popup>
+          </Marker>
+        </MapContainer>
+      </motion.div>
     </div>
   );
-};
-
-export default ContactPage;
+}
