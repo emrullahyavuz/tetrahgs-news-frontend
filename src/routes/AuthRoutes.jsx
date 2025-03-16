@@ -1,7 +1,8 @@
 import AuthLayout from "../layouts/AuthLayout";
-import ForgotPassword from "../pages/Auth/ForgotPassword";
+import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
+import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
 
 export const AuthRoutes = [
     {
@@ -18,7 +19,15 @@ export const AuthRoutes = [
         },
         {
             path:"forgot-password",
-            element: <ForgotPassword />
+            element: <ForgotPasswordPage />
+        },
+        {
+            path:"forgot-password",
+            element: <ForgotPasswordPage />
+        },
+        {
+            path:"reset-password/:token",
+            element: <ResetPasswordPage />
         },
         ]
     }

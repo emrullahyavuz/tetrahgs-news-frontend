@@ -1,8 +1,8 @@
-"use client"
-
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
+import { useToast } from "../../context/ToastContext"
+
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +12,7 @@ const Login = () => {
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loginError, setLoginError] = useState("")
+  const toast = useToast()
 
   const  {login}  = useAuth()
   const navigate = useNavigate()
@@ -65,9 +66,12 @@ const Login = () => {
 
     try {
       await login(formData.email, formData.password)
+      toast.success("Kullanıcı başarıyla giriş yaptı")
       navigate("/") // Başarılı girişten sonra ana sayfaya yönlendir
     } catch (err) {
       console.error("Login error:", err)
+      toast.error("Giriş yapılırken hata oluştu.Tekrar deneyin!")
+
       setLoginError(err.response?.data?.message || "Giriş yapılırken bir hata oluştu")
     } finally {
       setIsSubmitting(false)

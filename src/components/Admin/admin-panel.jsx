@@ -5,8 +5,7 @@ import NewsManagement from "./news-management";
 import CategoryManagement from "./category-management";
 import UserManagement from "./user-management";
 import Settings from "./settings";
-import { Menu, X, Bell, User } from "lucide-react";
-import AdminHeader from "./AdminHeader";
+
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");

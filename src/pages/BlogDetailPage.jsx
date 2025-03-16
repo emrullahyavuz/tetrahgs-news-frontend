@@ -368,6 +368,7 @@ const BlogDetail = () => {
   }
 
   const displayedComments = showAllComments ? comments : comments.slice(0, 3)
+  console.log(blog)
 
   if (loading) {
     return (

@@ -26,6 +26,7 @@ export const registerUser = async (userData) => {
 // Kullanıcı bilgilerini getir
 export const getCurrentUser = async (token) => {
   try {
+    
     const response = await axios.get(`${API_URL}/api/auth/me`, {
       headers: {
         Authorization: `Bearer ${token}`,

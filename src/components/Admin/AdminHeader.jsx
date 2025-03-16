@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext" // AuthContext'ten useAuth hook'unu import ediyoruz
@@ -143,7 +141,7 @@ const AdminHeader = () => {
   // Çıkış işlemi
   const handleLogout = () => {
     logout()
-    navigate("/auth/login") // Çıkış sonrası login sayfasına yönlendir
+    navigate("/") // Çıkış sonrası login sayfasına yönlendir
   }
 
   // Kullanıcı giriş yapmamışsa header'ı gösterme
