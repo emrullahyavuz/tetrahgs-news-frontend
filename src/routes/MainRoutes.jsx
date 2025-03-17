@@ -27,7 +27,11 @@ export const MainRoutes = [
         element: <ContactPage />,
       },
       {
-        path: "blog/:id",
+        path: "/news",
+        element: <NewsPage />,
+      },
+      {
+        path: "news/:id",
         element: <NewsDetailPage />,
       },
     ],
