@@ -1,30 +1,26 @@
-export default function Sidebar({ categories }) {
-  const popularPosts = [
-    {
-      id: 1,
-      title: "Quantum Computing Breakthrough Could Revolutionize Data Processing",
-      date: "28 Şubat 2025",
-      views: 1542,
-    },
-    {
-      id: 2,
-      title: "New Wearable Tech Monitors Health Metrics with Unprecedented Accuracy",
-      date: "27 Şubat 2025",
-      views: 1203,
-    },
-    {
-      id: 3,
-      title: "Blockchain Technology Finds New Applications in Supply Chain Management",
-      date: "26 Şubat 2025",
-      views: 987,
-    },
-    {
-      id: 4,
-      title: "5G Networks Expand to Rural Areas, Bridging the Digital Divide",
-      date: "25 Şubat 2025",
-      views: 854,
-    },
-  ]
+import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
+import { getPopularNews } from "../services/newsService"
+
+export default function Sidebar({ categories, currentCategory }) {
+  const [popularPosts, setPopularPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchPopularNews = async () => {
+      try {
+        setLoading(true)
+        const response = await getPopularNews(4)
+        setPopularPosts(response.news || [])
+      } catch (err) {
+        console.error("Popüler haberler yüklenirken hata:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPopularNews()
+  }, [])
 
   return (
     <div className="space-y-8">
@@ -32,15 +28,17 @@ export default function Sidebar({ categories }) {
       <div className="bg-white rounded-lg shadow-md p-5">
         <h3 className="text-lg text-[#F7A91E] font-bold mb-4">Kategoriler</h3>
         <ul className="space-y-2">
-          {categories.map((category, index) => (
-            <li key={index}>
-              <a
-                href="#"
-                className="flex justify-between items-center py-2 text-gray-600 hover:text-blue-600 transition-colors"
+          {categories.map((category) => (
+            <li key={category.id}>
+              <Link
+                to={category.slug ? `/news?category=${category.slug}` : "/news"}
+                className={`flex justify-between items-center py-2 transition-colors ${
+                  currentCategory === category.slug ? "text-[#F7A91E] font-medium" : "text-gray-600 hover:text-blue-600"
+                }`}
               >
-                <span>{category}</span>
-                {index > 0 && <span className="text-sm text-gray-400">{Math.floor(Math.random() * 50) + 10}</span>}
-              </a>
+                <span>{category.name}</span>
+                {category.count !== undefined && <span className="text-sm text-gray-400">{category.count}</span>}
+              </Link>
             </li>
           ))}
         </ul>
@@ -49,24 +47,28 @@ export default function Sidebar({ categories }) {
       {/* Popular Posts */}
       <div className="bg-white rounded-lg shadow-md p-5">
         <h3 className="text-lg text-[#F7A91E] font-bold mb-4">Popüler Haberler</h3>
-        <div className="space-y-4">
-          {popularPosts.map((post) => (
-            <div key={post.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-              <a href="#" className="block">
-                <h4 className="font-medium text-gray-800 hover:text-blue-600 transition-colors line-clamp-2">
-                  {post.title}
-                </h4>
-                <div className="flex justify-between mt-2 text-xs text-gray-500">
-                  <span>{post.date}</span>
-                  <span>{post.views} görüntülenme</span>
-                </div>
-              </a>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {popularPosts.map((post) => (
+              <div key={post.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                <Link to={`/news/${post.id}`} className="block">
+                  <h4 className="font-medium text-gray-800 hover:text-blue-600 transition-colors line-clamp-2">
+                    {post.title}
+                  </h4>
+                  <div className="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>{post.date}</span>
+                    <span>{post.views} görüntülenme</span>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      
     </div>
   )
 }
