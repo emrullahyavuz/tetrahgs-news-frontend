@@ -148,7 +148,7 @@ export const getCategories = async () => {
 
 export const createCategory = async (categoryData) => {
   try {
-    debugger;
+    
     const response = await api.post('/categories', categoryData);
     return response.data;
   } catch (error) {
@@ -159,7 +159,7 @@ export const createCategory = async (categoryData) => {
 
 export const updateCategory = async (categoryId, categoryData) => {
   try {
-    debugger;
+  
     const response = await api.put(`/categories/${categoryId}`, categoryData);
     return response.data;
   } catch (error) {

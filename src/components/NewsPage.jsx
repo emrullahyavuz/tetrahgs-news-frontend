@@ -1,465 +1,384 @@
 import { useState, useEffect } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
-import { Search, Filter, ChevronDown, ChevronUp, Loader } from "lucide-react"
-import NewsCard from "../components/NewsCard"
-import FeaturedNewsCard from "../components/FeaturedNewsCard"
-import CompactNewsCard from "../components/CompactNewsCard"
-import { getAllNews, getFeaturedNews, getNewsByCategory, getPopularNews } from "../services/newsService"
-import { getAllCategories } from "../services/categoryServices"
+import { Search, Filter, Calendar, Eye, Tag, ChevronRight, ChevronLeft, AlertCircle } from "lucide-react"
+import newsApi from "../services/newsService"
+import { Link } from "react-router-dom"
 
-const NewsPage = () => {
-  // State for news data
-  const [news, setNews] = useState([])
-  const [featuredNews, setFeaturedNews] = useState(null)
-  const [popularNews, setPopularNews] = useState([])
-  const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState(null)
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalItems, setTotalItems] = useState(0)
-  const [limit] = useState(6)
-
-  // Loading and error states
+export default function NewsPage() {
+  const [newsItems, setNewsItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [categories, setCategories] = useState([])
+  const [featuredNews, setFeaturedNews] = useState(null)
 
-  // Search state
-  const [searchQuery, setSearchQuery] = useState("")
-  const [showFilters, setShowFilters] = useState(false)
+  // Filtreleme ve arama state'leri
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "",
+    page: 1,
+    limit: 9,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  })
 
-  // Router hooks
-  const location = useLocation()
-  const navigate = useNavigate()
+  // Pagination state'i
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 9,
+    totalItems: 0,
+    totalPages: 0,
+  })
 
-  // Parse query parameters
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search)
-    const categoryParam = queryParams.get("category")
-    const searchParam = queryParams.get("search")
-    const pageParam = queryParams.get("page")
+  // Haberleri getir
+  const fetchNews = async () => {
+    try {
+      setLoading(true)
+      const response = await newsApi.getNews({
+        ...filters,
+         // Sadece yayında olan haberleri göster
+      })
 
-    if (categoryParam) {
-      setSelectedCategory(categoryParam)
-    } else {
-      setSelectedCategory(null)
-    }
-
-    if (searchParam) {
-      setSearchQuery(searchParam)
-    } else {
-      setSearchQuery("")
-    }
-
-    if (pageParam) {
-      setCurrentPage(Number.parseInt(pageParam, 10))
-    } else {
-      setCurrentPage(1)
-    }
-  }, [location.search])
-
-  // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await getAllCategories()
-        setCategories(response.categories)
-      } catch (err) {
-        console.error("Kategoriler yüklenirken hata:", err)
+      // Eğer ilk sayfadaysak ve haberler varsa, ilk haberi öne çıkan haber olarak ayarla
+      if (filters.page === 1 && response.data.length > 0) {
+        setFeaturedNews(response.data[0])
+        setNewsItems(response.data.slice(1)) // İlk haber hariç diğerlerini listele
+      } else {
+        setNewsItems(response.data)
       }
-    }
 
+      setPagination(response.pagination)
+      setLoading(false)
+    } catch (err) {
+      setError(err.message || "Haberler getirilirken bir hata oluştu")
+      setLoading(false)
+    }
+  }
+
+  // Kategorileri getir
+  const fetchCategories = async () => {
+    try {
+      const response = await newsApi.getCategories()
+      setCategories(response.data)
+    } catch (err) {
+      console.error("Kategoriler getirilirken bir hata oluştu:", err)
+    }
+  }
+
+  // Component mount olduğunda haberleri ve kategorileri getir
+  useEffect(() => {
+    fetchNews()
     fetchCategories()
   }, [])
 
-  // Fetch news data
+  // Filtreler değiştiğinde haberleri yeniden getir
   useEffect(() => {
-    const fetchNewsData = async () => {
-      try {
-        setLoading(true)
-        setError(null)
+    fetchNews()
+  }, [filters.page, filters.limit, filters.category, filters.sortBy, filters.sortOrder])
 
-        let newsResponse
-
-        // Fetch news based on selected category or search query
-        if (selectedCategory) {
-          newsResponse = await getNewsByCategory(selectedCategory, currentPage, limit)
-        } else if (searchQuery) {
-          // Implement search functionality when backend supports it
-          newsResponse = await getAllNews(currentPage, limit, searchQuery)
-        } else {
-          newsResponse = await getAllNews(currentPage, limit)
-        }
-
-        setNews(newsResponse.news)
-        setTotalPages(newsResponse.totalPages)
-        setTotalItems(newsResponse.totalItems)
-
-        // Only fetch featured and popular news on the first page and when no filters are applied
-        if (currentPage === 1 && !selectedCategory && !searchQuery) {
-          // Fetch featured news
-          const featuredResponse = await getFeaturedNews()
-          setFeaturedNews(featuredResponse.news)
-
-          // Fetch popular news
-          const popularResponse = await getPopularNews(4)
-          setPopularNews(popularResponse.news)
-        }
-      } catch (err) {
-        console.error("Haberler yüklenirken hata:", err)
-        setError("Haberler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchNewsData()
-  }, [selectedCategory, currentPage, limit, searchQuery])
-
-  // Handle search form submission
+  // Arama formunu handle et
   const handleSearch = (e) => {
     e.preventDefault()
-
-    // Update URL with search query
-    const params = new URLSearchParams()
-    if (searchQuery) {
-      params.set("search", searchQuery)
-    }
-    if (selectedCategory) {
-      params.set("category", selectedCategory)
-    }
-
-    // Reset to first page when searching
-    setCurrentPage(1)
-    navigate(`/news?${params.toString()}`)
+    setFilters({
+      ...filters,
+      search: e.target.search.value,
+      page: 1, // Arama yapıldığında ilk sayfaya dön
+    })
   }
 
-  // Handle category selection
-  const handleCategorySelect = (categorySlug) => {
-    // If clicking the already selected category, clear the filter
-    if (categorySlug === selectedCategory) {
-      setSelectedCategory(null)
-      navigate("/news")
-    } else {
-      setSelectedCategory(categorySlug)
+  // Filtre değişikliklerini handle et
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target
+    setFilters({
+      ...filters,
+      [name]: value,
+      page: 1, // Filtre değiştiğinde ilk sayfaya dön
+    })
+  }
 
-      // Update URL with category
-      const params = new URLSearchParams()
-      params.set("category", categorySlug)
-
-      // Reset to first page when changing category
-      setCurrentPage(1)
-      navigate(`/news?${params.toString()}`)
+  // Sayfa değişikliğini handle et
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= pagination.totalPages) {
+      setFilters({
+        ...filters,
+        page: newPage,
+      })
+      // Sayfa değiştiğinde sayfanın üstüne kaydır
+      window.scrollTo(0, 0)
     }
   }
 
-  // Handle pagination
-  const handlePageChange = (page) => {
-    setCurrentPage(page)
-
-    // Update URL with page number
-    const params = new URLSearchParams(location.search)
-    params.set("page", page.toString())
-    navigate(`/news?${params.toString()}`)
-
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: "smooth" })
+  // Sıralama değişikliğini handle et
+  const handleSortChange = (e) => {
+    const { value } = e.target
+    const [sortBy, sortOrder] = value.split("-")
+    setFilters({
+      ...filters,
+      sortBy,
+      sortOrder,
+      page: 1, // Sıralama değiştiğinde ilk sayfaya dön
+    })
   }
 
-  // Clear all filters
-  const clearFilters = () => {
-    setSelectedCategory(null)
-    setSearchQuery("")
-    setCurrentPage(1)
-    navigate("/news")
+  // Tarih formatını düzenle
+  const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric" }
+    return new Date(dateString).toLocaleDateString("tr-TR", options)
+  }
+
+  // Özeti kısalt
+  const truncateSummary = (text, maxLength = 150) => {
+    if (text.length <= maxLength) return text
+    return text.substr(0, maxLength) + "..."
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-[#0D1117] min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {selectedCategory
-              ? `${categories.find((c) => c.slug === selectedCategory)?.name || "Kategori"} Haberleri`
-              : searchQuery
-                ? `"${searchQuery}" için Arama Sonuçları`
-                : "Teknoloji Haberleri"}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {selectedCategory
-              ? `${categories.find((c) => c.slug === selectedCategory)?.description || "Bu kategorideki en güncel haberler"}`
-              : "Teknoloji dünyasındaki en son gelişmeler ve haberler"}
-          </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Teknoloji Haberleri</h1>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+          <span className="flex items-center">
+            <AlertCircle size={18} className="mr-2" />
+            {error}
+          </span>
+          <button className="absolute top-0 right-0 mt-3 mr-4" onClick={() => setError(null)}>
+            &times;
+          </button>
         </div>
+      )}
 
-        {/* Search and Filter Bar */}
-        <div className="bg-white dark:bg-[#181A2A] rounded-xl shadow-sm p-4 mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            {/* Search Form */}
-            <form onSubmit={handleSearch} className="flex-1">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Haberlerde ara..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-[#4B6BFB] focus:border-transparent dark:bg-[#0D1117] dark:text-white"
-                />
-                <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-600"
-                  size={18}
-                />
-                <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#4B6BFB] hover:text-[#3A54C4]"
-                >
-                  Ara
-                </button>
-              </div>
-            </form>
-
-            {/* Filter Toggle Button */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center text-gray-700 dark:text-gray-300 hover:text-[#4B6BFB] dark:hover:text-[#4B6BFB] transition-colors"
-            >
-              <Filter size={18} className="mr-2" />
-              Filtreler
-              {showFilters ? <ChevronUp size={18} className="ml-1" /> : <ChevronDown size={18} className="ml-1" />}
+      {/* Filters and Search */}
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <form onSubmit={handleSearch} className="relative flex-1">
+            <input
+              type="text"
+              name="search"
+              placeholder="Haber ara..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+            <button type="submit" className="hidden">
+              Ara
             </button>
-          </div>
+          </form>
 
-          {/* Filters */}
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-              <div className="flex flex-wrap gap-2">
-                <span className="text-sm text-gray-700 dark:text-gray-300 mr-2 pt-1">Kategoriler:</span>
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => handleCategorySelect(category.slug)}
-                    className={`px-3 py-1 rounded-lg text-sm ${
-                      selectedCategory === category.slug
-                        ? "bg-[#4B6BFB] text-white"
-                        : "bg-gray-100 dark:bg-[#0D1117] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
-                    } transition-colors`}
-                  >
-                    {category.name}
-                  </button>
-                ))}
+          <div className="flex flex-wrap gap-2">
+            <select
+              name="category"
+              value={filters.category}
+              onChange={handleFilterChange}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Tüm Kategoriler</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
 
-                {(selectedCategory || searchQuery) && (
-                  <button
-                    onClick={clearFilters}
-                    className="px-3 py-1 rounded-lg text-sm bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors ml-auto"
-                  >
-                    Filtreleri Temizle
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+            <select
+              onChange={handleSortChange}
+              value={`${filters.sortBy}-${filters.sortOrder}`}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="createdAt-desc">En Yeni</option>
+              <option value="createdAt-asc">En Eski</option>
+              <option value="views-desc">En Çok Okunan</option>
+              <option value="title-asc">Başlık (A-Z)</option>
+              <option value="title-desc">Başlık (Z-A)</option>
+            </select>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* News Feed */}
-          <div className="lg:col-span-8">
-            {/* Featured News - Only show on first page with no filters */}
-            {currentPage === 1 && !selectedCategory && !searchQuery && featuredNews && (
-              <div className="mb-8">
-                <FeaturedNewsCard news={featuredNews} />
-              </div>
-            )}
-
-            {/* Loading State */}
-            {loading && (
-              <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4B6BFB]"></div>
-              </div>
-            )}
-
-            {/* Error State */}
-            {error && (
-              <div className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-4 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
-
-            {/* No Results */}
-            {!loading && news.length === 0 && (
-              <div className="bg-white dark:bg-[#181A2A] rounded-xl shadow-sm p-8 text-center">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Sonuç Bulunamadı</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  {searchQuery
-                    ? `"${searchQuery}" için arama sonucu bulunamadı.`
-                    : selectedCategory
-                      ? "Bu kategoride haber bulunamadı."
-                      : "Henüz haber bulunmuyor."}
-                </p>
-                <button
-                  onClick={clearFilters}
-                  className="px-4 py-2 bg-[#4B6BFB] text-white rounded-lg hover:bg-[#3A54C4] transition-colors"
-                >
-                  Tüm Haberleri Göster
-                </button>
-              </div>
-            )}
-
-            {/* News Grid */}
-            {!loading && news.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {news.map((item) => (
-                  <NewsCard key={item.id} news={item} />
-                ))}
-              </div>
-            )}
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-8">
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-lg ${
-                      currentPage === 1
-                        ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                        : "bg-white dark:bg-[#181A2A] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    }`}
-                  >
-                    Önceki
-                  </button>
-
-                  {/* Page Numbers */}
-                  {[...Array(totalPages)].map((_, index) => {
-                    const pageNumber = index + 1
-                    // Only show a few page numbers around the current page
-                    if (
-                      pageNumber === 1 ||
-                      pageNumber === totalPages ||
-                      (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={pageNumber}
-                          onClick={() => handlePageChange(pageNumber)}
-                          className={`w-10 h-10 rounded-lg ${
-                            currentPage === pageNumber
-                              ? "bg-[#4B6BFB] text-white"
-                              : "bg-white dark:bg-[#181A2A] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                          }`}
-                        >
-                          {pageNumber}
-                        </button>
-                      )
-                    } else if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
-                      return (
-                        <span key={pageNumber} className="text-gray-500">
-                          ...
-                        </span>
-                      )
-                    }
-                    return null
-                  })}
-
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded-lg ${
-                      currentPage === totalPages
-                        ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                        : "bg-white dark:bg-[#181A2A] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    }`}
-                  >
-                    Sonraki
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-4">
-            {/* Popular News */}
-            <div className="bg-white dark:bg-[#181A2A] rounded-xl shadow-sm p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <span className="w-2 h-6 bg-[#F7A91E] rounded-full mr-2"></span>
-                Popüler Haberler
-              </h3>
-
-              {popularNews.length > 0 ? (
-                <div className="space-y-4">
-                  {popularNews.map((item) => (
-                    <CompactNewsCard key={item.id} news={item} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                  {loading ? (
-                    <div className="flex justify-center">
-                      <Loader className="animate-spin h-6 w-6" />
-                    </div>
-                  ) : (
-                    "Popüler haber bulunamadı."
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Categories */}
-            <div className="bg-white dark:bg-[#181A2A] rounded-xl shadow-sm p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <span className="w-2 h-6 bg-[#4B6BFB] rounded-full mr-2"></span>
-                Kategoriler
-              </h3>
-
-              <div className="space-y-2">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => handleCategorySelect(category.slug)}
-                    className={`block w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                      selectedCategory === category.slug
-                        ? "bg-[#4B6BFB]/10 text-[#4B6BFB]"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#0D1117]"
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Newsletter Subscription */}
-            <div className="bg-gradient-to-r from-[#4B6BFB]/80 to-[#6B8AFB]/80 rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-white mb-2">Bültenimize Abone Olun</h3>
-              <p className="text-white/80 text-sm mb-4">
-                En son teknoloji haberlerini ve güncellemelerini e-posta kutunuza alın.
-              </p>
-
-              <form className="space-y-3">
-                <input
-                  type="email"
-                  placeholder="E-posta adresiniz"
-                  className="w-full px-4 py-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/60 focus:ring-2 focus:ring-white/50 focus:border-transparent"
-                />
-                <button
-                  type="submit"
-                  className="w-full px-4 py-2 bg-white text-[#4B6BFB] rounded-lg font-medium hover:bg-white/90 transition-colors"
-                >
-                  Abone Ol
-                </button>
-              </form>
-            </div>
+            <button
+              onClick={() => {
+                setFilters({
+                  search: "",
+                  category: "",
+                  page: 1,
+                  limit: 9,
+                  sortBy: "createdAt",
+                  sortOrder: "desc",
+                })
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center"
+            >
+              <Filter size={18} className="mr-1" />
+              Filtreleri Temizle
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+
+      {/* Featured News */}
+      {!loading && featuredNews && filters.page === 1 && (
+        <div className="mb-12">
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="md:flex">
+              <div className="md:flex-shrink-0 md:w-1/2">
+                <img
+                  className="h-64 w-full object-cover md:h-full"
+                  src={featuredNews.imageUrl || `/placeholder.svg?height=400&width=600`}
+                  alt={featuredNews.title}
+                />
+              </div>
+              <div className="p-8 md:w-1/2">
+                <div className="flex items-center mb-2">
+                  <Tag size={16} className="text-blue-500 mr-2" />
+                  <span className="text-sm text-blue-500 font-medium">{featuredNews.category}</span>
+                </div>
+                <Link to={`/news/${featuredNews.id}`} className="block mt-1">
+                  <h2 className="text-2xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                    {featuredNews.title}
+                  </h2>
+                </Link>
+                <p className="mt-3 text-gray-600">{featuredNews.summary}</p>
+                <div className="mt-6 flex items-center">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Calendar size={16} className="mr-1" />
+                    <span>{formatDate(featuredNews.createdAt)}</span>
+                  </div>
+                  <div className="ml-6 flex items-center text-sm text-gray-500">
+                    <Eye size={16} className="mr-1" />
+                    <span>{featuredNews.views} görüntülenme</span>
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <Link
+                    to={`/news/${featuredNews.id}`}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Devamını Oku
+                    <ChevronRight size={16} className="ml-1" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* News Grid */}
+      {!loading && newsItems.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+          <h3 className="text-lg font-medium text-gray-900">Haber Bulunamadı</h3>
+          <p className="mt-2 text-gray-500">
+            Arama kriterlerinize uygun haber bulunamadı. Lütfen filtrelerinizi değiştirin.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {newsItems.map((news) => (
+            <div
+              key={news.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+            >
+              <Link to={`/news/${news.id}`}>
+                <img
+                  className="h-48 w-full object-cover"
+                  src={news.imageUrl || `/placeholder.svg?height=300&width=400`}
+                  alt={news.title}
+                />
+              </Link>
+              <div className="p-6">
+                <div className="flex items-center mb-2">
+                  <Tag size={16} className="text-blue-500 mr-2" />
+                  <span className="text-sm text-blue-500 font-medium">{news.category}</span>
+                </div>
+                <Link to={`/news/${news.id}`} className="block mt-1">
+                  <h3 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                    {news.title}
+                  </h3>
+                </Link>
+                <p className="mt-3 text-gray-600">{truncateSummary(news.summary)}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Calendar size={16} className="mr-1" />
+                    <span>{formatDate(news.createdAt)}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Eye size={16} className="mr-1" />
+                    <span>{news.views}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center space-x-1 py-4">
+          <button
+            onClick={() => handlePageChange(pagination.page - 1)}
+            disabled={pagination.page === 1}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          >
+            <ChevronLeft size={16} className="mr-1" />
+            Önceki
+          </button>
+
+          <div className="hidden md:flex">
+            {[...Array(pagination.totalPages).keys()].map((x) => {
+              // Çok fazla sayfa varsa, sadece belirli sayfaları göster
+              if (
+                pagination.totalPages <= 7 ||
+                x === 0 ||
+                x === pagination.totalPages - 1 ||
+                (x >= pagination.page - 2 && x <= pagination.page + 2)
+              ) {
+                return (
+                  <button
+                    key={x + 1}
+                    onClick={() => handlePageChange(x + 1)}
+                    className={`px-4 py-2 border text-sm font-medium rounded-md mx-1 ${
+                      pagination.page === x + 1
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {x + 1}
+                  </button>
+                )
+              } else if (
+                (x === 1 && pagination.page > 4) ||
+                (x === pagination.totalPages - 2 && pagination.page < pagination.totalPages - 3)
+              ) {
+                return (
+                  <span key={x} className="px-2">
+                    ...
+                  </span>
+                )
+              }
+              return null
+            })}
+          </div>
+
+          <div className="md:hidden">
+            <span className="text-sm text-gray-700">
+              Sayfa {pagination.page} / {pagination.totalPages}
+            </span>
+          </div>
+
+          <button
+            onClick={() => handlePageChange(pagination.page + 1)}
+            disabled={pagination.page === pagination.totalPages}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          >
+            Sonraki
+            <ChevronRight size={16} className="ml-1" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
-
-export default NewsPage
 

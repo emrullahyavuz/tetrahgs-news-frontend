@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   // Kullanıcı oturumunu kontrol et
   useEffect(() => {
     const checkAuth = async () => {
+      debugger
       const token = localStorage.getItem("token");
 
       if (!token) {

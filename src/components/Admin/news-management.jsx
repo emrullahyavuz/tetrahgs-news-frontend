@@ -1,101 +1,206 @@
-import { useState } from "react";
-import { Search, Plus, Edit, Trash2, Eye, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Filter,
+  AlertCircle,
+} from "lucide-react";
+import newsApi from "../../services/newsService";
 
 export default function NewsManagement() {
+  const [newsItems, setNewsItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [formData, setFormData] = useState({
+    title: "",
+    summary: "",
+    content: "",
+    categoryId: "",
+    status: "draft",
+    imageUrl: "",
+  });
 
-  // Mock data for news items
-  const newsItems = [
-    {
-      id: 1,
-      title: "Apple Announces New M3 MacBook Pro with Enhanced Performance",
-      summary:
-        "Apple's latest MacBook Pro features the new M3 chip, promising up to 40% better performance than previous models.",
-      category: "Donanım",
-      status: "published",
-      author: "Mehmet Yılmaz",
-      date: "1 Mart 2025",
-      views: 1245,
-    },
-    {
-      id: 2,
-      title: "Google Unveils Advanced AI Features for Search",
-      summary:
-        "Google's new AI-powered search features aim to provide more contextual and personalized results to users.",
-      category: "Yapay Zeka",
-      status: "published",
-      author: "Ayşe Kaya",
-      date: "28 Şubat 2025",
-      views: 987,
-    },
-    {
-      id: 3,
-      title: "Tesla Releases Software Update for Full Self-Driving Beta",
-      summary:
-        "Tesla's latest update brings significant improvements to its Full Self-Driving capabilities with enhanced navigation.",
-      category: "Otomotiv",
-      status: "draft",
-      author: "Ali Demir",
-      date: "27 Şubat 2025",
-      views: 0,
-    },
-    {
-      id: 4,
-      title: "Microsoft Announces Windows 12 Release Date",
-      summary:
-        "Microsoft has officially announced the release date for Windows 12, featuring a redesigned interface and AI integration.",
-      category: "Yazılım",
-      status: "published",
-      author: "Zeynep Şahin",
-      date: "26 Şubat 2025",
-      views: 756,
-    },
-    {
-      id: 5,
-      title: "Samsung Unveils New Foldable Smartphone Technology",
-      summary:
-        "Samsung's latest innovation in foldable display technology promises more durable and versatile smartphones.",
-      category: "Mobil",
-      status: "review",
-      author: "Emre Yıldız",
-      date: "25 Şubat 2025",
-      views: 432,
-    },
-    {
-      id: 6,
-      title: "SpaceX Successfully Launches Starship for Mars Mission Test",
-      summary:
-        "SpaceX's Starship completed its first successful orbital test flight, marking a significant step toward Mars missions.",
-      category: "Uzay Teknolojileri",
-      status: "published",
-      author: "Deniz Kara",
-      date: "24 Şubat 2025",
-      views: 1089,
-    },
-    {
-      id: 7,
-      title:
-        "New Quantum Computing Breakthrough Could Revolutionize Data Processing",
-      summary:
-        "Scientists have achieved a significant breakthrough in quantum computing that could transform how we process complex data.",
-      category: "Quantum Bilişim",
-      status: "published",
-      author: "Prof. Dr. Ahmet Yılmaz",
-      date: "23 Şubat 2025",
-      views: 876,
-    },
-  ];
+  // Filtreleme ve arama state'leri
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "",
+    status: "",
+    page: 1,
+    limit: 10,
+  });
 
+  // Pagination state'i
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    totalItems: 0,
+    totalPages: 0,
+  });
+
+  // Haberleri getir
+  const fetchNews = async () => {
+    try {
+      setLoading(true);
+      const response = await newsApi.getNews(filters);
+      setNewsItems(response.data);
+      setPagination(response.pagination);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message || "Haberler getirilirken bir hata oluştu");
+      setLoading(false);
+    }
+  };
+
+  // Kategorileri getir
+  const fetchCategories = async () => {
+    try {
+      const response = await newsApi.getCategories();
+      setCategories(response.data);
+    } catch (err) {
+      console.error("Kategoriler getirilirken bir hata oluştu:", err);
+    }
+  };
+
+  // Component mount olduğunda haberleri ve kategorileri getir
+  useEffect(() => {
+    fetchNews();
+    fetchCategories();
+  }, []);
+
+  // Filtreler değiştiğinde haberleri yeniden getir
+  useEffect(() => {
+    fetchNews();
+  }, [filters.page, filters.limit, filters.category, filters.status]);
+
+  // Form input değişikliklerini handle et
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Arama formunu handle et
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setFilters({
+      ...filters,
+      search: e.target.search.value,
+      page: 1, // Arama yapıldığında ilk sayfaya dön
+    });
+  };
+
+  // Filtre değişikliklerini handle et
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters({
+      ...filters,
+      [name]: value,
+      page: 1, // Filtre değiştiğinde ilk sayfaya dön
+    });
+  };
+
+  // Sayfa değişikliğini handle et
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= pagination.totalPages) {
+      setFilters({
+        ...filters,
+        page: newPage,
+      });
+    }
+  };
+
+  // Düzenleme modalını aç
   const handleEdit = (news) => {
     setSelectedNews(news);
+    setFormData({
+      title: news.title,
+      summary: news.summary,
+      content: news.content || "",
+      categoryId: news.categoryId,
+      status: news.status,
+      imageUrl: news.imageUrl || "",
+    });
     setIsAddModalOpen(true);
   };
 
+  // Silme modalını aç
   const handleDelete = (news) => {
     setSelectedNews(news);
     setIsDeleteModalOpen(true);
+  };
+
+  // Yeni haber ekle
+  const handleAddNews = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+
+      if (selectedNews) {
+        // Haber güncelleme
+        await newsApi.updateNews(selectedNews.id, formData);
+      } else {
+        // Yeni haber ekleme
+        await newsApi.createNews(formData);
+      }
+
+      // Modalı kapat ve haberleri yenile
+      setIsAddModalOpen(false);
+      setSelectedNews(null);
+      setFormData({
+        title: "",
+        summary: "",
+        content: "",
+        categoryId: "",
+        status: "draft",
+        imageUrl: "",
+      });
+      fetchNews();
+    } catch (err) {
+      setError(err.message || "Haber kaydedilirken bir hata oluştu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Haberi sil
+  const handleConfirmDelete = async () => {
+    try {
+      setLoading(true);
+      await newsApi.deleteNews(selectedNews.id);
+
+      // Modalı kapat ve haberleri yenile
+      setIsDeleteModalOpen(false);
+      setSelectedNews(null);
+      fetchNews();
+    } catch (err) {
+      setError(err.message || "Haber silinirken bir hata oluştu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Haber durumunu güncelle
+  const handleStatusChange = async (id, status) => {
+    try {
+      await newsApi.updateNewsStatus(id, status);
+      fetchNews();
+    } catch (err) {
+      setError(err.message || "Durum güncellenirken bir hata oluştu");
+    }
+  };
+
+  // Haber detayını görüntüle
+  const handleViewNews = (id) => {
+    window.open(`/news/${id}`, "_blank");
   };
 
   return (
@@ -106,6 +211,14 @@ export default function NewsManagement() {
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center"
           onClick={() => {
             setSelectedNews(null);
+            setFormData({
+              title: "",
+              summary: "",
+              content: "",
+              categoryId: "",
+              status: "draft",
+              imageUrl: "",
+            });
             setIsAddModalOpen(true);
           }}
         >
@@ -114,12 +227,29 @@ export default function NewsManagement() {
         </button>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <span className="flex items-center">
+            <AlertCircle size={18} className="mr-2" />
+            {error}
+          </span>
+          <button
+            className="absolute top-0 right-0 mt-3 mr-4"
+            onClick={() => setError(null)}
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Filters and Search */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative flex-1">
+          <form onSubmit={handleSearch} className="relative flex-1">
             <input
               type="text"
+              name="search"
               placeholder="Haber ara..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -127,27 +257,52 @@ export default function NewsManagement() {
               className="absolute left-3 top-2.5 text-gray-400"
               size={18}
             />
-          </div>
+            <button type="submit" className="hidden">
+              Ara
+            </button>
+          </form>
 
           <div className="flex flex-wrap gap-2">
-            <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select
+              name="category"
+              value={filters.category}
+              onChange={handleFilterChange}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
               <option value="">Tüm Kategoriler</option>
-              <option value="hardware">Donanım</option>
-              <option value="software">Yazılım</option>
-              <option value="ai">Yapay Zeka</option>
-              <option value="mobile">Mobil</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
             </select>
 
-            <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select
+              name="status"
+              value={filters.status}
+              onChange={handleFilterChange}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
               <option value="">Tüm Durumlar</option>
               <option value="published">Yayında</option>
               <option value="draft">Taslak</option>
               <option value="review">İncelemede</option>
             </select>
 
-            <button className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center">
+            <button
+              onClick={() => {
+                setFilters({
+                  search: "",
+                  category: "",
+                  status: "",
+                  page: 1,
+                  limit: 10,
+                });
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center"
+            >
               <Filter size={18} className="mr-1" />
-              Filtrele
+              Filtreleri Temizle
             </button>
           </div>
         </div>
@@ -204,61 +359,82 @@ export default function NewsManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {newsItems.map((news) => (
-                <tr key={news.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {news.title}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{news.category}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        news.status === "published"
-                          ? "bg-green-100 text-green-800"
-                          : news.status === "draft"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {news.status === "published"
-                        ? "Yayında"
-                        : news.status === "draft"
-                        ? "Taslak"
-                        : "İncelemede"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{news.author}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{news.date}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{news.views}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                      onClick={() => handleEdit(news)}
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button className="text-gray-600 hover:text-gray-900 mr-3">
-                      <Eye size={18} />
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => handleDelete(news)}
-                    >
-                      <Trash2 size={18} />
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="px-6 py-4 text-center">
+                    Yükleniyor...
                   </td>
                 </tr>
-              ))}
+              ) : newsItems.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="px-6 py-4 text-center">
+                    Haber bulunamadı
+                  </td>
+                </tr>
+              ) : (
+                newsItems.map((news) => (
+                  <tr key={news.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {news.title}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {news.category}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          news.status === "published"
+                            ? "bg-green-100 text-green-800"
+                            : news.status === "draft"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {news.status === "published"
+                          ? "Yayında"
+                          : news.status === "draft"
+                          ? "Taslak"
+                          : "İncelemede"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{news.author}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {news.createdAt}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{news.views}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        className="text-blue-600 hover:text-blue-900 mr-3"
+                        onClick={() => handleEdit(news)}
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        className="text-gray-600 hover:text-gray-900 mr-3"
+                        onClick={() => handleViewNews(news.id)}
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button
+                        className="text-red-600 hover:text-red-900"
+                        onClick={() => handleDelete(news)}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -268,9 +444,20 @@ export default function NewsManagement() {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-700">
-                Toplam <span className="font-medium">7</span> haberden{" "}
-                <span className="font-medium">1</span> ile{" "}
-                <span className="font-medium">7</span> arası gösteriliyor
+                Toplam{" "}
+                <span className="font-medium">{pagination.totalItems}</span>{" "}
+                haberden{" "}
+                <span className="font-medium">
+                  {(pagination.page - 1) * pagination.limit + 1}
+                </span>{" "}
+                ile{" "}
+                <span className="font-medium">
+                  {Math.min(
+                    pagination.page * pagination.limit,
+                    pagination.totalItems
+                  )}
+                </span>{" "}
+                arası gösteriliyor
               </p>
             </div>
             <div>
@@ -278,39 +465,40 @@ export default function NewsManagement() {
                 className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                 aria-label="Pagination"
               >
-                <a
-                  href="#"
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                <button
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="sr-only">Previous</span>
                   &laquo;
-                </a>
-                <a
-                  href="#"
-                  aria-current="page"
-                  className="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                >
-                  1
-                </a>
-                <a
-                  href="#"
-                  className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                >
-                  2
-                </a>
-                <a
-                  href="#"
-                  className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                >
-                  3
-                </a>
-                <a
-                  href="#"
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                </button>
+
+                {[...Array(pagination.totalPages).keys()].map((x) => (
+                  <button
+                    key={x + 1}
+                    onClick={() => handlePageChange(x + 1)}
+                    aria-current={
+                      pagination.page === x + 1 ? "page" : undefined
+                    }
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      pagination.page === x + 1
+                        ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                    }`}
+                  >
+                    {x + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page === pagination.totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="sr-only">Next</span>
                   &raquo;
-                </a>
+                </button>
               </nav>
             </div>
           </div>
@@ -334,133 +522,150 @@ export default function NewsManagement() {
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      {selectedNews ? "Haberi Düzenle" : "Yeni Haber Ekle"}
-                    </h3>
-                    <div className="mt-4 space-y-4">
-                      <div>
-                        <label
-                          htmlFor="title"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Başlık
-                        </label>
-                        <input
-                          type="text"
-                          id="title"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          defaultValue={selectedNews?.title || ""}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="summary"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Özet
-                        </label>
-                        <textarea
-                          id="summary"
-                          rows={3}
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          defaultValue={selectedNews?.summary || ""}
-                        ></textarea>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleAddNews}>
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        {selectedNews ? "Haberi Düzenle" : "Yeni Haber Ekle"}
+                      </h3>
+                      <div className="mt-4 space-y-4">
                         <div>
                           <label
-                            htmlFor="category"
+                            htmlFor="title"
                             className="block text-sm font-medium text-gray-700"
                           >
-                            Kategori
+                            Başlık
                           </label>
-                          <select
-                            id="category"
+                          <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleInputChange}
+                            required
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            defaultValue={selectedNews?.category || ""}
-                          >
-                            <option value="">Kategori Seçin</option>
-                            <option value="Donanım">Donanım</option>
-                            <option value="Yazılım">Yazılım</option>
-                            <option value="Yapay Zeka">Yapay Zeka</option>
-                            <option value="Mobil">Mobil</option>
-                            <option value="Otomotiv">Otomotiv</option>
-                            <option value="Uzay Teknolojileri">
-                              Uzay Teknolojileri
-                            </option>
-                          </select>
+                          />
                         </div>
                         <div>
                           <label
-                            htmlFor="status"
+                            htmlFor="summary"
                             className="block text-sm font-medium text-gray-700"
                           >
-                            Durum
+                            Özet
                           </label>
-                          <select
-                            id="status"
+                          <textarea
+                            id="summary"
+                            name="summary"
+                            rows={3}
+                            value={formData.summary}
+                            onChange={handleInputChange}
+                            required
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            defaultValue={selectedNews?.status || "draft"}
-                          >
-                            <option value="draft">Taslak</option>
-                            <option value="review">İncelemede</option>
-                            <option value="published">Yayında</option>
-                          </select>
+                          ></textarea>
                         </div>
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="image"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Görsel
-                        </label>
-                        <div className="mt-1 flex items-center">
-                          <button
-                            type="button"
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                          >
-                            Görsel Seç
-                          </button>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label
+                              htmlFor="categoryId"
+                              className="block text-sm font-medium text-gray-700"
+                            >
+                              Kategori
+                            </label>
+                            <select
+                              id="categoryId"
+                              name="categoryId"
+                              value={formData.categoryId}
+                              onChange={handleInputChange}
+                              required
+                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="">Kategori Seçin</option>
+                              {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                  {category.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="status"
+                              className="block text-sm font-medium text-gray-700"
+                            >
+                              Durum
+                            </label>
+                            <select
+                              id="status"
+                              name="status"
+                              value={formData.status}
+                              onChange={handleInputChange}
+                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="draft">Taslak</option>
+                              <option value="review">İncelemede</option>
+                              <option value="published">Yayında</option>
+                            </select>
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="content"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          İçerik
-                        </label>
-                        <textarea
-                          id="content"
-                          rows={6}
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          defaultValue={selectedNews?.content || ""}
-                        ></textarea>
+                        <div>
+                          <label
+                            htmlFor="imageUrl"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Görsel URL
+                          </label>
+                          <input
+                            type="text"
+                            id="imageUrl"
+                            name="imageUrl"
+                            value={formData.imageUrl}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="content"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            İçerik
+                          </label>
+                          <textarea
+                            id="content"
+                            name="content"
+                            rows={6}
+                            value={formData.content}
+                            onChange={handleInputChange}
+                            required
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          ></textarea>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => setIsAddModalOpen(false)}
-                >
-                  {selectedNews ? "Güncelle" : "Ekle"}
-                </button>
-                <button
-                  type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => setIsAddModalOpen(false)}
-                >
-                  İptal
-                </button>
-              </div>
+                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                  <button
+                    type="submit"
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    disabled={loading}
+                  >
+                    {loading
+                      ? "İşleniyor..."
+                      : selectedNews
+                      ? "Güncelle"
+                      : "Ekle"}
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => setIsAddModalOpen(false)}
+                  >
+                    İptal
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -505,9 +710,10 @@ export default function NewsManagement() {
                 <button
                   type="button"
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => setIsDeleteModalOpen(false)}
+                  onClick={handleConfirmDelete}
+                  disabled={loading}
                 >
-                  Sil
+                  {loading ? "Siliniyor..." : "Sil"}
                 </button>
                 <button
                   type="button"

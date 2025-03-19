@@ -1,54 +1,103 @@
 import axios from "axios"
 
-const API_URL = "http://localhost:5000"
+const API_URL = "http://localhost:5000/api"
 
-// Tüm haberleri getir
-export const getAllNews = async (page = 1, limit = 6) => {
-  try {
-    const response = await axios.get(`${API_URL}/api/news?page=${page}&limit=${limit}`)
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Haberler yüklenirken bir hata oluştu." }
-  }
+// Axios instance
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+})
+
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error),
+)
+
+// News API service
+const newsApi = {
+  // Haberleri getir (filtreleme ve arama desteği ile)
+  
+  getNews: async (params = {}) => {
+    try {
+      debugger
+      const response = await api.get("/news", { params })
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error.message
+    }
+  },
+
+  // Belirli bir haberi getir
+  getNewsById: async (id) => {
+    try {
+      const response = await api.get(`/news/${id}`)
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error.message
+    }
+  },
+
+  // Yeni haber ekle
+  createNews: async (newsData) => {
+    try {
+      debugger
+      const response = await api.post("/news", newsData)
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error.message
+    }
+  },
+
+  // Haberi güncelle
+  updateNews: async (id, newsData) => {
+    try {
+      debugger
+      const response = await api.put(`/news/${id}`, newsData)
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error.message
+    }
+  },
+
+  // Haberi sil
+  deleteNews: async (id) => {
+    try {
+      const response = await api.delete(`/news/${id}`)
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error.message
+    }
+  },
+
+  // Kategorileri getir
+  getCategories: async () => {
+    try {
+      const response = await api.get("/news/categories/all")
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error.message
+    }
+  },
+
+  // Haber durumunu güncelle
+  updateNewsStatus: async (id, status) => {
+    try {
+      const response = await api.put(`/news/${id}/status`, { status })
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error.message
+    }
+  },
 }
 
-// Öne çıkan haberi getir
-export const getFeaturedNews = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/api/news/featured`)
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Öne çıkan haber yüklenirken bir hata oluştu." }
-  }
-}
-
-// Kategoriye göre haberleri getir
-export const getNewsByCategory = async (categorySlug, page = 1, limit = 6) => {
-  try {
-    const response = await axios.get(`${API_URL}/api/news/category/${categorySlug}?page=${page}&limit=${limit}`)
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Kategoriye göre haberler yüklenirken bir hata oluştu." }
-  }
-}
-
-// Popüler haberleri getir
-export const getPopularNews = async (limit = 4) => {
-  try {
-    const response = await axios.get(`${API_URL}/api/news/popular?limit=${limit}`)
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Popüler haberler yüklenirken bir hata oluştu." }
-  }
-}
-
-// Haber detayını getir
-export const getNewsById = async (id) => {
-  try {
-    const response = await axios.get(`${API_URL}/api/news/${id}`)
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Haber detayı yüklenirken bir hata oluştu." }
-  }
-}
+export default newsApi
 

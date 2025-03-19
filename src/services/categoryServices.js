@@ -5,6 +5,7 @@ const API_URL = "http://localhost:5000"
 // Tüm kategorileri getir
 export const getAllCategories = async () => {
   try {
+    debugger
     const response = await axios.get(`${API_URL}/api/categories`)
     return response.data
   } catch (error) {
