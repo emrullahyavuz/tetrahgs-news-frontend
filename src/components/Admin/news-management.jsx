@@ -11,7 +11,7 @@ export default function NewsManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [categories, setCategories] = useState([])
-  const [userRole, setUserRole] = useState(null)
+  const [userRole, setUserRole] = useState(1)
   const [formData, setFormData] = useState({
     title: "",
     summary: "",

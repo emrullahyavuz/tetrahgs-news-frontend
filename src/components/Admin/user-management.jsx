@@ -34,6 +34,7 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      debugger
       const data = await getUsers();
       setUsers(data.users || data);
       setError(null);
@@ -411,7 +412,7 @@ export default function UserManagement() {
                         : "Hiç giriş yapmadı"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.articles || 0}
+                      {user.newsCount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button

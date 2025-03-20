@@ -28,6 +28,7 @@ export default function CategoryManagement() {
   const fetchCategories = async () => {
     try {
       setLoading(true);
+      debugger
       const data = await getCategories();
       
       setCategories(data.categories);
@@ -41,6 +42,7 @@ export default function CategoryManagement() {
       setLoading(false);
     }
   };
+  console.log(categories)
 
   useEffect(() => {
     fetchCategories();
@@ -162,7 +164,7 @@ export default function CategoryManagement() {
 
         // Yeni kategoriyi listeye ekle
         const newCategory = response.category;
-        setCategories([...categories, { ...newCategory, newsCount: 0 }]);
+        setCategories([...categories, { ...newCategory, newsCount }]);
 
         toast.success("Kategori başarıyla oluşturuldu.");
       }
@@ -277,7 +279,7 @@ export default function CategoryManagement() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {category.newsCount ? 0 : 0}
+                        {category.newsCount ? category.newsCount : 0}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
