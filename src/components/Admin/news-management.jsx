@@ -1,23 +1,17 @@
-import { useState, useEffect } from "react";
-import {
-  Search,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  Filter,
-  AlertCircle,
-} from "lucide-react";
-import newsApi from "../../services/newsService";
+import { useState, useEffect } from "react"
+import { Search, Plus, Edit, Trash2, Eye, Filter, AlertCircle, Check, X } from "lucide-react"
+import newsApi from "../../services/newsService"
+import { getCurrentUser, getUserId } from "../../services/authService"
 
 export default function NewsManagement() {
-  const [newsItems, setNewsItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedNews, setSelectedNews] = useState(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [newsItems, setNewsItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [selectedNews, setSelectedNews] = useState(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [userRole, setUserRole] = useState(null)
   const [formData, setFormData] = useState({
     title: "",
     summary: "",
@@ -25,7 +19,7 @@ export default function NewsManagement() {
     categoryId: "",
     status: "draft",
     imageUrl: "",
-  });
+  })
 
   // Filtreleme ve arama state'leri
   const [filters, setFilters] = useState({
@@ -34,7 +28,7 @@ export default function NewsManagement() {
     status: "",
     page: 1,
     limit: 10,
-  });
+  })
 
   // Pagination state'i
   const [pagination, setPagination] = useState({
@@ -42,71 +36,86 @@ export default function NewsManagement() {
     limit: 10,
     totalItems: 0,
     totalPages: 0,
-  });
+  })
+
+  // Kullanıcı rolünü getir
+  const fetchUserRole = async () => {
+    try {
+      const response = await getCurrentUser()
+      console.log("Kullanıcı bilgileri:", response)
+      if (response.success && response.user) {
+        setUserRole(response.user.roleId)
+        console.log("Kullanıcı rolü:", response.user.roleId)
+      }
+    } catch (err) {
+      console.error("Kullanıcı bilgileri getirilirken bir hata oluştu:", err)
+    }
+  }
 
   // Haberleri getir
   const fetchNews = async () => {
     try {
-      setLoading(true);
-      const response = await newsApi.getNews(filters);
-      setNewsItems(response.data);
-      setPagination(response.pagination);
-      setLoading(false);
+      setLoading(true)
+      const response = await newsApi.getNews(filters)
+      setNewsItems(response.data)
+      setPagination(response.pagination)
+      setLoading(false)
     } catch (err) {
-      setError(err.message || "Haberler getirilirken bir hata oluştu");
-      setLoading(false);
+      setError(err.message || "Haberler getirilirken bir hata oluştu")
+      setLoading(false)
     }
-  };
+  }
 
   // Kategorileri getir
   const fetchCategories = async () => {
     try {
-      const response = await newsApi.getCategories();
-      setCategories(response.data);
+      const response = await newsApi.getCategories()
+      setCategories(response.data)
     } catch (err) {
-      console.error("Kategoriler getirilirken bir hata oluştu:", err);
+      console.error("Kategoriler getirilirken bir hata oluştu:", err)
     }
-  };
+  }
 
-  // Component mount olduğunda haberleri ve kategorileri getir
+  // Component mount olduğunda haberleri, kategorileri ve kullanıcı rolünü getir
   useEffect(() => {
-    fetchNews();
-    fetchCategories();
-  }, []);
+    fetchUserRole()
+    fetchNews()
+    fetchCategories()
+  }, [])
 
   // Filtreler değiştiğinde haberleri yeniden getir
   useEffect(() => {
-    fetchNews();
-  }, [filters.page, filters.limit, filters.category, filters.status]);
+    fetchNews()
+  }, [filters.page, filters.limit, filters.category, filters.status])
 
   // Form input değişikliklerini handle et
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData({
       ...formData,
       [name]: value,
-    });
-  };
+    })
+  }
 
   // Arama formunu handle et
   const handleSearch = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     setFilters({
       ...filters,
       search: e.target.search.value,
       page: 1, // Arama yapıldığında ilk sayfaya dön
-    });
-  };
+    })
+  }
 
   // Filtre değişikliklerini handle et
   const handleFilterChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFilters({
       ...filters,
       [name]: value,
       page: 1, // Filtre değiştiğinde ilk sayfaya dön
-    });
-  };
+    })
+  }
 
   // Sayfa değişikliğini handle et
   const handlePageChange = (newPage) => {
@@ -114,47 +123,63 @@ export default function NewsManagement() {
       setFilters({
         ...filters,
         page: newPage,
-      });
+      })
     }
-  };
+  }
 
   // Düzenleme modalını aç
   const handleEdit = (news) => {
-    setSelectedNews(news);
-    setFormData({
-      title: news.title,
-      summary: news.summary,
-      content: news.content || "",
-      categoryId: news.categoryId,
-      status: news.status,
-      imageUrl: news.imageUrl || "",
-    });
-    setIsAddModalOpen(true);
-  };
+    // Admin her haberi düzenleyebilir, editor sadece kendi haberlerini
+    if (userRole === 1 || (userRole === 2 && news.authorId === getUserId())) {
+      setSelectedNews(news)
+      setFormData({
+        title: news.title,
+        summary: news.summary,
+        content: news.content || "",
+        categoryId: news.categoryId,
+        status: news.status,
+        imageUrl: news.imageUrl || "",
+      })
+      setIsAddModalOpen(true)
+    } else {
+      setError("Bu haberi düzenleme yetkiniz yok")
+    }
+  }
 
   // Silme modalını aç
   const handleDelete = (news) => {
-    setSelectedNews(news);
-    setIsDeleteModalOpen(true);
-  };
+    // Admin her haberi silebilir, editor sadece kendi haberlerini
+    if (userRole === 1 || (userRole === 2 && news.authorId === getUserId())) {
+      setSelectedNews(news)
+      setIsDeleteModalOpen(true)
+    } else {
+      setError("Bu haberi silme yetkiniz yok")
+    }
+  }
 
-  // Yeni haber ekle
+  // Yeni haber ekle veya mevcut haberi güncelle
   const handleAddNews = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      setLoading(true);
+      setLoading(true)
 
       if (selectedNews) {
         // Haber güncelleme
-        await newsApi.updateNews(selectedNews.id, formData);
+        console.log("Haber güncelleniyor:", selectedNews.id, formData)
+        const response = await newsApi.updateNews(selectedNews.id, formData)
+        console.log("Güncelleme yanıtı:", response)
+        setError(null)
       } else {
         // Yeni haber ekleme
-        await newsApi.createNews(formData);
+        console.log("Yeni haber ekleniyor:", formData)
+        const response = await newsApi.createNews(formData)
+        console.log("Ekleme yanıtı:", response)
+        setError(null)
       }
 
       // Modalı kapat ve haberleri yenile
-      setIsAddModalOpen(false);
-      setSelectedNews(null);
+      setIsAddModalOpen(false)
+      setSelectedNews(null)
       setFormData({
         title: "",
         summary: "",
@@ -162,46 +187,108 @@ export default function NewsManagement() {
         categoryId: "",
         status: "draft",
         imageUrl: "",
-      });
-      fetchNews();
+      })
+      fetchNews()
     } catch (err) {
-      setError(err.message || "Haber kaydedilirken bir hata oluştu");
+      console.error("Haber kaydedilirken hata:", err)
+      setError(err.message || "Haber kaydedilirken bir hata oluştu")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Haberi sil
   const handleConfirmDelete = async () => {
     try {
-      setLoading(true);
-      await newsApi.deleteNews(selectedNews.id);
+      setLoading(true)
+      console.log("Haber siliniyor:", selectedNews.id)
+      const response = await newsApi.deleteNews(selectedNews.id)
+      console.log("Silme yanıtı:", response)
+      setError(null)
 
       // Modalı kapat ve haberleri yenile
-      setIsDeleteModalOpen(false);
-      setSelectedNews(null);
-      fetchNews();
+      setIsDeleteModalOpen(false)
+      setSelectedNews(null)
+      fetchNews()
     } catch (err) {
-      setError(err.message || "Haber silinirken bir hata oluştu");
+      console.error("Haber silinirken hata:", err)
+      setError(err.message || "Haber silinirken bir hata oluştu")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Haber durumunu güncelle
   const handleStatusChange = async (id, status) => {
     try {
-      await newsApi.updateNewsStatus(id, status);
-      fetchNews();
+      // Haberi kontrol et
+      const news = newsItems.find((item) => item.id === id)
+
+      // Admin her haberin durumunu değiştirebilir, editor sadece kendi haberlerinin
+      if (userRole === 1 || (userRole === 2 && news.authorId === getUserId())) {
+        console.log("Haber durumu değiştiriliyor:", id, status)
+        const response = await newsApi.updateNewsStatus(id, status)
+        console.log("Durum değiştirme yanıtı:", response)
+        setError(null)
+        fetchNews()
+      } else {
+        setError("Bu haberin durumunu değiştirme yetkiniz yok")
+      }
     } catch (err) {
-      setError(err.message || "Durum güncellenirken bir hata oluştu");
+      console.error("Durum güncellenirken hata:", err)
+      setError(err.message || "Durum güncellenirken bir hata oluştu")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   // Haber detayını görüntüle
   const handleViewNews = (id) => {
-    window.open(`/news/${id}`, "_blank");
-  };
+    window.open(`/news/${id}`, "_blank")
+  }
+
+  // Kullanıcının haberi düzenleme yetkisi var mı?
+  const canEditNews = (news) => {
+    // Admin (roleId=1) her haberi düzenleyebilir
+    // Editor (roleId=2) sadece kendi haberlerini düzenleyebilir
+    const isAdmin = userRole === 1
+    const isEditor = userRole === 2
+    const isAuthor = news.authorId === getUserId()
+
+    console.log("Düzenleme yetkisi kontrolü:", {
+      userRole,
+      newsAuthorId: news.authorId,
+      currentUserId: getUserId(),
+      isAdmin,
+      isEditor,
+      isAuthor,
+      hasPermission: isAdmin || (isEditor && isAuthor),
+    })
+
+    return isAdmin || (isEditor && isAuthor)
+  }
+
+  // Kullanıcının haberi silme yetkisi var mı?
+  const canDeleteNews = (news) => {
+    // Admin (roleId=1) her haberi silebilir
+    // Editor (roleId=2) sadece kendi haberlerini silebilir
+    const isAdmin = userRole === 1
+    const isEditor = userRole === 2
+    const isAuthor = news.authorId === getUserId()
+
+    return isAdmin || (isEditor && isAuthor)
+  }
+
+  // Kullanıcının haberin durumunu değiştirme yetkisi var mı?
+  const canChangeStatus = (news) => {
+    // Admin (roleId=1) her haberin durumunu değiştirebilir
+    // Editor (roleId=2) sadece kendi haberlerinin durumunu değiştirebilir
+    const isAdmin = userRole === 1
+    const isEditor = userRole === 2
+    const isAuthor = news.authorId === getUserId()
+
+    return isAdmin || (isEditor && isAuthor)
+  }
 
   return (
     <div className="space-y-6">
@@ -210,7 +297,7 @@ export default function NewsManagement() {
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center"
           onClick={() => {
-            setSelectedNews(null);
+            setSelectedNews(null)
             setFormData({
               title: "",
               summary: "",
@@ -218,8 +305,8 @@ export default function NewsManagement() {
               categoryId: "",
               status: "draft",
               imageUrl: "",
-            });
-            setIsAddModalOpen(true);
+            })
+            setIsAddModalOpen(true)
           }}
         >
           <Plus size={18} className="mr-1" />
@@ -234,10 +321,7 @@ export default function NewsManagement() {
             <AlertCircle size={18} className="mr-2" />
             {error}
           </span>
-          <button
-            className="absolute top-0 right-0 mt-3 mr-4"
-            onClick={() => setError(null)}
-          >
+          <button className="absolute top-0 right-0 mt-3 mr-4" onClick={() => setError(null)}>
             &times;
           </button>
         </div>
@@ -253,10 +337,7 @@ export default function NewsManagement() {
               placeholder="Haber ara..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <Search
-              className="absolute left-3 top-2.5 text-gray-400"
-              size={18}
-            />
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
             <button type="submit" className="hidden">
               Ara
             </button>
@@ -297,7 +378,7 @@ export default function NewsManagement() {
                   status: "",
                   page: 1,
                   limit: 10,
-                });
+                })
               }}
               className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center"
             >
@@ -352,7 +433,7 @@ export default function NewsManagement() {
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   İşlemler
                 </th>
@@ -375,62 +456,89 @@ export default function NewsManagement() {
                 newsItems.map((news) => (
                   <tr key={news.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {news.title}
-                      </div>
+                      <div className="text-sm font-medium text-gray-900">{news.title}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {news.category}
-                      </div>
+                      <div className="text-sm text-gray-500">{news.category}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          news.status === "published"
-                            ? "bg-green-100 text-green-800"
-                            : news.status === "draft"
-                            ? "bg-gray-100 text-gray-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {news.status === "published"
-                          ? "Yayında"
-                          : news.status === "draft"
-                          ? "Taslak"
-                          : "İncelemede"}
-                      </span>
+                      <div className="flex items-center">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            news.status === "published"
+                              ? "bg-green-100 text-green-800"
+                              : news.status === "draft"
+                                ? "bg-gray-100 text-gray-800"
+                                : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {news.status === "published" ? "Yayında" : news.status === "draft" ? "Taslak" : "İncelemede"}
+                        </span>
+
+                        {canChangeStatus(news) && (
+                          <div className="ml-2 flex space-x-1">
+                            {news.status !== "published" && (
+                              <button
+                                onClick={() => handleStatusChange(news.id, "published")}
+                                className="text-green-600 hover:text-green-900"
+                                title="Yayınla"
+                              >
+                                <Check size={16} />
+                              </button>
+                            )}
+                            {news.status !== "draft" && (
+                              <button
+                                onClick={() => handleStatusChange(news.id, "draft")}
+                                className="text-gray-600 hover:text-gray-900"
+                                title="Taslak"
+                              >
+                                <X size={16} />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">{news.author}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {news.createdAt}
-                      </div>
+                      <div className="text-sm text-gray-500">{news.createdAt.split("T")[0]}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{news.views}</div>
+                      <div className="text-sm text-gray-500">{news.viewCount}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                        onClick={() => handleEdit(news)}
-                      >
-                        <Edit size={18} />
-                      </button>
+                      {/* Düzenleme butonu - Admin veya kendi haberiyse editor */}
+                      {canEditNews(news) && (
+                        <button
+                          className="text-blue-600 hover:text-blue-900 mr-3"
+                          onClick={() => handleEdit(news)}
+                          title="Düzenle"
+                        >
+                          <Edit size={18} />
+                        </button>
+                      )}
+
+                      {/* Görüntüleme butonu - Herkes */}
                       <button
                         className="text-gray-600 hover:text-gray-900 mr-3"
                         onClick={() => handleViewNews(news.id)}
+                        title="Görüntüle"
                       >
                         <Eye size={18} />
                       </button>
-                      <button
-                        className="text-red-600 hover:text-red-900"
-                        onClick={() => handleDelete(news)}
-                      >
-                        <Trash2 size={18} />
-                      </button>
+
+                      {/* Silme butonu - Admin veya kendi haberiyse editor */}
+                      {canDeleteNews(news) && (
+                        <button
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => handleDelete(news)}
+                          title="Sil"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -444,27 +552,16 @@ export default function NewsManagement() {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-700">
-                Toplam{" "}
-                <span className="font-medium">{pagination.totalItems}</span>{" "}
-                haberden{" "}
+                Toplam <span className="font-medium">{pagination.totalItems}</span> haberden{" "}
+                <span className="font-medium">{(pagination.page - 1) * pagination.limit + 1}</span> ile{" "}
                 <span className="font-medium">
-                  {(pagination.page - 1) * pagination.limit + 1}
-                </span>{" "}
-                ile{" "}
-                <span className="font-medium">
-                  {Math.min(
-                    pagination.page * pagination.limit,
-                    pagination.totalItems
-                  )}
+                  {Math.min(pagination.page * pagination.limit, pagination.totalItems)}
                 </span>{" "}
                 arası gösteriliyor
               </p>
             </div>
             <div>
-              <nav
-                className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                aria-label="Pagination"
-              >
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                 <button
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
@@ -478,9 +575,7 @@ export default function NewsManagement() {
                   <button
                     key={x + 1}
                     onClick={() => handlePageChange(x + 1)}
-                    aria-current={
-                      pagination.page === x + 1 ? "page" : undefined
-                    }
+                    aria-current={pagination.page === x + 1 ? "page" : undefined}
                     className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                       pagination.page === x + 1
                         ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
@@ -509,16 +604,10 @@ export default function NewsManagement() {
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              aria-hidden="true"
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75" aria-hidden="true"></div>
             </div>
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-            >
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -531,10 +620,7 @@ export default function NewsManagement() {
                       </h3>
                       <div className="mt-4 space-y-4">
                         <div>
-                          <label
-                            htmlFor="title"
-                            className="block text-sm font-medium text-gray-700"
-                          >
+                          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                             Başlık
                           </label>
                           <input
@@ -548,10 +634,7 @@ export default function NewsManagement() {
                           />
                         </div>
                         <div>
-                          <label
-                            htmlFor="summary"
-                            className="block text-sm font-medium text-gray-700"
-                          >
+                          <label htmlFor="summary" className="block text-sm font-medium text-gray-700">
                             Özet
                           </label>
                           <textarea
@@ -566,10 +649,7 @@ export default function NewsManagement() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label
-                              htmlFor="categoryId"
-                              className="block text-sm font-medium text-gray-700"
-                            >
+                            <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700">
                               Kategori
                             </label>
                             <select
@@ -589,10 +669,7 @@ export default function NewsManagement() {
                             </select>
                           </div>
                           <div>
-                            <label
-                              htmlFor="status"
-                              className="block text-sm font-medium text-gray-700"
-                            >
+                            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
                               Durum
                             </label>
                             <select
@@ -609,10 +686,7 @@ export default function NewsManagement() {
                           </div>
                         </div>
                         <div>
-                          <label
-                            htmlFor="imageUrl"
-                            className="block text-sm font-medium text-gray-700"
-                          >
+                          <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
                             Görsel URL
                           </label>
                           <input
@@ -625,10 +699,7 @@ export default function NewsManagement() {
                           />
                         </div>
                         <div>
-                          <label
-                            htmlFor="content"
-                            className="block text-sm font-medium text-gray-700"
-                          >
+                          <label htmlFor="content" className="block text-sm font-medium text-gray-700">
                             İçerik
                           </label>
                           <textarea
@@ -651,11 +722,7 @@ export default function NewsManagement() {
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                     disabled={loading}
                   >
-                    {loading
-                      ? "İşleniyor..."
-                      : selectedNews
-                      ? "Güncelle"
-                      : "Ekle"}
+                    {loading ? "İşleniyor..." : selectedNews ? "Güncelle" : "Ekle"}
                   </button>
                   <button
                     type="button"
@@ -675,16 +742,10 @@ export default function NewsManagement() {
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              aria-hidden="true"
-            >
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-            >
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
               &#8203;
             </span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -694,13 +755,10 @@ export default function NewsManagement() {
                     <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      Haberi Sil
-                    </h3>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">Haberi Sil</h3>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
-                        Bu haberi silmek istediğinizden emin misiniz? Bu işlem
-                        geri alınamaz.
+                        Bu haberi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
                       </p>
                     </div>
                   </div>
@@ -728,5 +786,6 @@ export default function NewsManagement() {
         </div>
       )}
     </div>
-  );
+  )
 }
+

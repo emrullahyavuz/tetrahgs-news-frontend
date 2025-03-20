@@ -18,6 +18,7 @@ export default function NewsPage() {
     limit: 9,
     sortBy: "createdAt",
     sortOrder: "desc",
+    status: "published", // Sadece yayında olan haberleri göster
   })
 
   // Pagination state'i
@@ -32,10 +33,7 @@ export default function NewsPage() {
   const fetchNews = async () => {
     try {
       setLoading(true)
-      const response = await newsApi.getNews({
-        ...filters,
-         // Sadece yayında olan haberleri göster
-      })
+      const response = await newsApi.getNews(filters)
 
       // Eğer ilk sayfadaysak ve haberler varsa, ilk haberi öne çıkan haber olarak ayarla
       if (filters.page === 1 && response.data.length > 0) {
@@ -72,7 +70,7 @@ export default function NewsPage() {
   // Filtreler değiştiğinde haberleri yeniden getir
   useEffect(() => {
     fetchNews()
-  }, [filters.page, filters.limit, filters.category, filters.sortBy, filters.sortOrder])
+  }, [filters.page, filters.limit, filters.category, filters.sortBy, filters.sortOrder, filters.search])
 
   // Arama formunu handle et
   const handleSearch = (e) => {
@@ -185,7 +183,7 @@ export default function NewsPage() {
             >
               <option value="createdAt-desc">En Yeni</option>
               <option value="createdAt-asc">En Eski</option>
-              <option value="views-desc">En Çok Okunan</option>
+              <option value="viewCount-desc">En Çok Okunan</option>
               <option value="title-asc">Başlık (A-Z)</option>
               <option value="title-desc">Başlık (Z-A)</option>
             </select>
@@ -199,6 +197,7 @@ export default function NewsPage() {
                   limit: 9,
                   sortBy: "createdAt",
                   sortOrder: "desc",
+                  status: "published",
                 })
               }}
               className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center"
@@ -247,7 +246,7 @@ export default function NewsPage() {
                   </div>
                   <div className="ml-6 flex items-center text-sm text-gray-500">
                     <Eye size={16} className="mr-1" />
-                    <span>{featuredNews.views} görüntülenme</span>
+                    <span>{featuredNews.viewCount} görüntülenme</span>
                   </div>
                 </div>
                 <div className="mt-6">
@@ -305,7 +304,7 @@ export default function NewsPage() {
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <Eye size={16} className="mr-1" />
-                    <span>{news.views}</span>
+                    <span>{news.viewCount}</span>
                   </div>
                 </div>
               </div>
