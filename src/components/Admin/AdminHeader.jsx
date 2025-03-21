@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext" // AuthContext'ten useAuth hook'unu import ediyoruz
+import { useAuth } from "../../context/AuthContext"
 import tetraHGS from "../../assets/tetrahgs.png"
+import notificationService from "../../services/notificationService"
 import {
   Bell,
   Search,
@@ -15,10 +16,13 @@ import {
   ChevronDown,
   MessageSquare,
   BarChart2,
+  UserPlus,
+  RefreshCw,
+  Check,
 } from "lucide-react"
 
 const AdminHeader = () => {
-  const { user, isAuthenticated, logout } = useAuth() // AuthContext'ten gerekli değerleri alıyoruz
+  const { user, isAuthenticated, logout, checkAuthStatus } = useAuth()
   const navigate = useNavigate()
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
@@ -26,42 +30,68 @@ const AdminHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Yeni Yorum",
-      message: "Yeni bir yorum onay bekliyor",
-      time: "5 dakika önce",
-      read: false,
-      type: "comment",
-    },
-    {
-      id: 2,
-      title: "Sistem Bildirimi",
-      message: "Veritabanı yedeklemesi tamamlandı",
-      time: "1 saat önce",
-      read: false,
-      type: "system",
-    },
-    {
-      id: 3,
-      title: "Yeni Kullanıcı",
-      message: "Yeni bir kullanıcı kaydoldu",
-      time: "3 saat önce",
-      read: true,
-      type: "user",
-    },
-  ])
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const profileRef = useRef(null)
   const notificationsRef = useRef(null)
 
+  // Sayfa yüklendiğinde token kontrolü yap
+  useEffect(() => {
+    const verifyAuth = async () => {
+      try {
+        await checkAuthStatus()
+      } catch (err) {
+        console.error("Kimlik doğrulama hatası:", err)
+        navigate("/login", { replace: true })
+      }
+    }
+
+    verifyAuth()
+  }, [checkAuthStatus, navigate])
+
   // Kullanıcı giriş yapmamışsa admin sayfasına erişimi engelle
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/auth/login", { replace: true })
+      navigate("/login", { replace: true })
     }
   }, [isAuthenticated, navigate])
+
+  // Bildirimleri getir
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await notificationService.getNotifications({ limit: 10 })
+      setNotifications(response.data)
+      setUnreadCount(response.pagination.unreadCount)
+      setLoading(false)
+    } catch (err) {
+      console.error("Bildirimler getirilirken hata:", err)
+      setError("Bildirimler getirilirken bir hata oluştu")
+      setLoading(false)
+    }
+  }
+
+  // Component mount olduğunda bildirimleri getir
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications()
+    }
+  }, [isAuthenticated])
+
+  // Periyodik olarak bildirimleri güncelle (her 30 saniyede bir)
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    const interval = setInterval(() => {
+      fetchNotifications()
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [isAuthenticated])
 
   // Dark mode toggle
   useEffect(() => {
@@ -108,22 +138,54 @@ const AdminHeader = () => {
     console.log("Searching for:", searchQuery)
   }
 
-  const markAllAsRead = () => {
-    setNotifications(
-      notifications.map((notification) => ({
-        ...notification,
-        read: true,
-      })),
-    )
+  const markAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead()
+      setNotifications(
+        notifications.map((notification) => ({
+          ...notification,
+          isRead: true,
+        })),
+      )
+      setUnreadCount(0)
+    } catch (err) {
+      console.error("Bildirimler okundu olarak işaretlenirken hata:", err)
+    }
   }
 
-  const markAsRead = (id) => {
-    setNotifications(
-      notifications.map((notification) => (notification.id === id ? { ...notification, read: true } : notification)),
-    )
+  const markAsRead = async (id) => {
+    try {
+      await notificationService.markAsRead(id)
+      setNotifications(
+        notifications.map((notification) =>
+          notification.id === id ? { ...notification, isRead: true } : notification,
+        ),
+      )
+      setUnreadCount((prev) => (prev > 0 ? prev - 1 : 0))
+    } catch (err) {
+      console.error("Bildirim okundu olarak işaretlenirken hata:", err)
+    }
   }
 
-  const unreadCount = notifications.filter((notification) => !notification.read).length
+  // Bildirime tıklandığında ilgili sayfaya yönlendir
+  const handleNotificationClick = (notification) => {
+    markAsRead(notification.id)
+
+    // Bildirim tipine göre yönlendirme yap
+    switch (notification.type) {
+      case "comment":
+        navigate(`/admin/comments/pending/${notification.entityId}`)
+        break
+      case "user":
+        navigate(`/admin/users/${notification.entityId}`)
+        break
+      default:
+        navigate("/admin/notifications")
+        break
+    }
+
+    setIsNotificationsOpen(false)
+  }
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -132,7 +194,7 @@ const AdminHeader = () => {
       case "system":
         return <BarChart2 className="h-5 w-5 text-purple-500" />
       case "user":
-        return <User className="h-5 w-5 text-green-500" />
+        return <UserPlus className="h-5 w-5 text-green-500" />
       default:
         return <Bell className="h-5 w-5 text-gray-500" />
     }
@@ -141,7 +203,7 @@ const AdminHeader = () => {
   // Çıkış işlemi
   const handleLogout = () => {
     logout()
-    navigate("/") // Çıkış sonrası login sayfasına yönlendir
+    navigate("/login") // Çıkış sonrası login sayfasına yönlendir
   }
 
   // Kullanıcı giriş yapmamışsa header'ı gösterme
@@ -167,7 +229,11 @@ const AdminHeader = () => {
                 )}
               </button>
               <Link to="/admin" className="flex items-center">
-                <img className="h-8 w-auto" src={tetraHGS || "/placeholder.svg"} alt="Admin Panel Logo" />
+                <img
+                  className="h-8 w-auto"
+                  src={tetraHGS || "/placeholder.svg?height=32&width=32"}
+                  alt="Admin Panel Logo"
+                />
                 <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white hidden sm:block">
                   TetraHaber Admin Panel
                 </span>
@@ -216,6 +282,9 @@ const AdminHeader = () => {
                   onClick={() => {
                     setIsNotificationsOpen(!isNotificationsOpen)
                     setIsProfileOpen(false)
+                    if (!isNotificationsOpen) {
+                      fetchNotifications()
+                    }
                   }}
                   className="relative p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
@@ -233,27 +302,49 @@ const AdminHeader = () => {
                     <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
                       <div className="flex justify-between items-center">
                         <h3 className="text-sm font-medium text-gray-900 dark:text-white">Bildirimler</h3>
-                        {unreadCount > 0 && (
-                          <button
-                            onClick={markAllAsRead}
-                            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                          >
-                            Tümünü okundu işaretle
-                          </button>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          {loading ? (
+                            <RefreshCw className="h-4 w-4 text-gray-400 animate-spin" />
+                          ) : (
+                            <button
+                              onClick={fetchNotifications}
+                              className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                              title="Yenile"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </button>
+                          )}
+                          {unreadCount > 0 && (
+                            <button
+                              onClick={markAllAsRead}
+                              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                            >
+                              Tümünü okundu işaretle
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="max-h-60 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Bildirim bulunmuyor</div>
+                      {loading && notifications.length === 0 ? (
+                        <div className="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
+                          <RefreshCw className="h-5 w-5 mx-auto mb-2 animate-spin" />
+                          Bildirimler yükleniyor...
+                        </div>
+                      ) : error ? (
+                        <div className="px-4 py-3 text-sm text-center text-red-500">{error}</div>
+                      ) : notifications.length === 0 ? (
+                        <div className="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
+                          Bildirim bulunmuyor
+                        </div>
                       ) : (
                         notifications.map((notification) => (
                           <div
                             key={notification.id}
-                            className={`px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                              !notification.read ? "bg-blue-50 dark:bg-blue-900/20" : ""
+                            className={`px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer ${
+                              !notification.isRead ? "bg-blue-50 dark:bg-blue-900/20" : ""
                             }`}
-                            onClick={() => markAsRead(notification.id)}
+                            onClick={() => handleNotificationClick(notification)}
                           >
                             <div className="flex items-start">
                               <div className="flex-shrink-0 mt-0.5">{getNotificationIcon(notification.type)}</div>
@@ -262,8 +353,20 @@ const AdminHeader = () => {
                                   {notification.title}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">{notification.message}</p>
-                                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{notification.time}</p>
+                                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{notification.timeAgo}</p>
                               </div>
+                              {notification.type === "comment" && (
+                                <button
+                                  className="ml-2 p-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full hover:bg-green-200 dark:hover:bg-green-800/30"
+                                  title="Yorumu Onayla"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    navigate(`/admin/comments/approve/${notification.entityId}`)
+                                  }}
+                                >
+                                  <Check size={16} />
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))
@@ -297,7 +400,7 @@ const AdminHeader = () => {
                     {user?.profileImage ? (
                       <img
                         className="h-full w-full object-cover"
-                        src={user.profileImage || "/placeholder.svg"}
+                        src={user.profileImage || "/placeholder.svg?height=32&width=32"}
                         alt={user.fullName}
                       />
                     ) : (

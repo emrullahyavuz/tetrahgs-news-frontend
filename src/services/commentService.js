@@ -1,148 +1,157 @@
 import axios from "axios"
 
-const API_URL = "http://localhost:5000"
+const API_URL = "http://localhost:5000/api"
 
-// Tüm yorumları getir (Admin, Editor)
-export const getAllComments = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/api/comments`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Yorumlar yüklenirken bir hata oluştu." }
-  }
-}
+// Axios instance
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+})
 
-// Haber ID'sine göre yorumları getir (Public)
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error),
+)
+
+// Response interceptor to handle errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Yetki hatası durumunda kullanıcıyı login sayfasına yönlendir
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // Token süresi dolmuş veya geçersiz
+      if (error.response.status === 401) {
+        localStorage.removeItem("token")
+        // Eğer tarayıcı ortamındaysak yönlendirme yap
+        if (typeof window !== "undefined") {
+          window.location.href = "/login"
+        }
+      }
+    }
+    return Promise.reject(error)
+  },
+)
+
+// Habere ait yorumları getir
 export const getCommentsByNewsId = async (newsId) => {
   try {
-    
-    const response = await axios.get(`${API_URL}/api/comments/news/${newsId}`)
-    return response.data
+    const response = await api.get(`/comments/news/${newsId}`)
+    return {
+      comments: response.data.data,
+      pagination: response.data.pagination,
+    }
   } catch (error) {
-    throw error.response?.data || { message: "Yorumlar yüklenirken bir hata oluştu." }
+    throw error.response?.data || { message: error.message }
   }
 }
 
-// Onay bekleyen yorumları getir (Admin, Editor)
-export const getPendingComments = async () => {
+// Belirli bir yorumu getir
+export const getCommentById = async (commentId) => {
   try {
-    const response = await axios.get(`${API_URL}/api/comments/pending`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-    return response.data
+    const response = await api.get(`/comments/${commentId}`)
+    return {
+      success: true,
+      comment: response.data.data,
+    }
   } catch (error) {
-    throw error.response?.data || { message: "Onay bekleyen yorumlar yüklenirken bir hata oluştu." }
+    throw error.response?.data || { message: error.message }
   }
 }
 
-// Kullanıcının kendi yorumlarını getir (Private)
-export const getUserComments = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/api/comments/user`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Yorumlarınız yüklenirken bir hata oluştu." }
-  }
-}
-
-// Yorum oluştur (Private)
+// Yeni yorum ekle
 export const createComment = async (commentData) => {
   try {
-    debugger;
-    const response = await axios.post(`${API_URL}/api/comments`, commentData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "application/json",
-      },
-    })
-    return response.data
+    const response = await api.post("/comments", commentData)
+    return {
+      success: true,
+      comment: response.data.data,
+    }
   } catch (error) {
-    throw error.response?.data || { message: "Yorum gönderilirken bir hata oluştu." }
+    throw error.response?.data || { message: error.message }
   }
 }
 
-// Yorum güncelle (Admin, Editor, Comment Owner)
+// Yorumu güncelle
 export const updateComment = async (commentId, commentData) => {
   try {
-    const response = await axios.put(`${API_URL}/api/comments/${commentId}`, commentData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "application/json",
-      },
-    })
-    return response.data
+    const response = await api.put(`/comments/${commentId}`, commentData)
+    return {
+      success: true,
+      comment: response.data.data,
+    }
   } catch (error) {
-    throw error.response?.data || { message: "Yorum güncellenirken bir hata oluştu." }
+    throw error.response?.data || { message: error.message }
   }
 }
 
-// Yorumu onayla (Admin, Editor)
-export const approveComment = async (commentId) => {
-  try {
-    const response = await axios.put(
-      `${API_URL}/api/comments/${commentId}/approve`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      },
-    )
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Yorum onaylanırken bir hata oluştu." }
-  }
-}
-
-// Yorumu reddet (Admin, Editor)
-export const rejectComment = async (commentId) => {
-  try {
-    const response = await axios.put(
-      `${API_URL}/api/comments/${commentId}/reject`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      },
-    )
-    return response.data
-  } catch (error) {
-    throw error.response?.data || { message: "Yorum reddedilirken bir hata oluştu." }
-  }
-}
-
-// Yorumu sil (Admin, Editor, Comment Owner)
+// Yorumu sil
 export const deleteComment = async (commentId) => {
   try {
-    const response = await axios.delete(`${API_URL}/api/comments/${commentId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-    return response.data
+    await api.delete(`/comments/${commentId}`)
+    return {
+      success: true,
+    }
   } catch (error) {
-    throw error.response?.data || { message: "Yorum silinirken bir hata oluştu." }
+    throw error.response?.data || { message: error.message }
   }
 }
 
-// Haber ID'sine göre yorum sayısını getir (Public)
-export const getCommentCountByNewsId = async (newsId) => {
+// Yorumu beğen
+export const likeComment = async (commentId) => {
   try {
-    const response = await axios.get(`${API_URL}/api/comments/count/news/${newsId}`)
-    return response.data
+    const response = await api.post(`/comments/${commentId}/like`)
+    return {
+      success: true,
+      likes: response.data.likes,
+    }
   } catch (error) {
-    throw error.response?.data || { message: "Yorum sayısı yüklenirken bir hata oluştu." }
+    throw error.response?.data || { message: error.message }
+  }
+}
+
+// Yorum beğenisini kaldır
+export const unlikeComment = async (commentId) => {
+  try {
+    const response = await api.delete(`/comments/${commentId}/like`)
+    return {
+      success: true,
+    }
+  } catch (error) {
+    throw error.response?.data || { message: error.message }
+  }
+}
+
+// Yorumu raporla
+export const reportComment = async (commentId, reason) => {
+  try {
+    const response = await api.post(`/comments/${commentId}/report`, { reason })
+    return {
+      success: true,
+    }
+  } catch (error) {
+    throw error.response?.data || { message: error.message }
+  }
+}
+
+// Yorumu onayla
+export const approveComment = async (commentId) => {
+  try {
+    const response = await api.put(`/comments/${commentId}/approve`)
+    return {
+      success: true,
+      comment: response.data.data,
+    }
+  } catch (error) {
+    throw error.response?.data || { message: error.message }
   }
 }
 
