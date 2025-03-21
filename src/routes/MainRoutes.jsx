@@ -26,10 +26,7 @@ export const MainRoutes = [
         path: "contact",
         element: <ContactPage />,
       },
-      {
-        path: "/news",
-        element: <NewsPage />,
-      },
+
       {
         path: "news/:id",
         element: <NewsDetailPage />,

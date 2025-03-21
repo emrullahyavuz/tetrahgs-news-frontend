@@ -1,46 +1,74 @@
 import { Link } from "react-router-dom"
-import { Calendar } from "lucide-react"
+import { Calendar, Eye, Star } from "lucide-react"
 
 const CompactNewsCard = ({ news }) => {
-  // Destructure news properties with fallbacks for safety
-  const { id, title, imageUrl, category, categorySlug, createdAt } = news
+  // Zaman farkını hesapla
+  const getTimeAgo = (dateString) => {
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInSeconds = Math.floor((now - date) / 1000)
 
-  // Format date
-  const formattedDate = new Date(createdAt).toLocaleDateString("tr-TR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds} saniye önce`
+    }
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60)
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} dakika önce`
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60)
+    if (diffInHours < 24) {
+      return `${diffInHours} saat önce`
+    }
+
+    const diffInDays = Math.floor(diffInHours / 24)
+    if (diffInDays < 30) {
+      return `${diffInDays} gün önce`
+    }
+
+    const options = { year: "numeric", month: "long", day: "numeric" }
+    return new Date(dateString).toLocaleDateString("tr-TR", options)
+  }
 
   return (
-    <div className="flex items-center gap-3 mb-4 group">
-      {/* Thumbnail */}
-      <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
-        <Link to={`/news/${id}`}>
-          <img
-            src={imageUrl || "/placeholder.svg?height=200&width=200"}
-            alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        </Link>
-      </div>
-
-      {/* Content */}
+    <div className="flex items-start space-x-3 group">
+      <Link to={`/news/${news.id}`} className="flex-shrink-0">
+        <img
+          src={news.imageUrl || `/placeholder.svg?height=80&width=80`}
+          alt={news.title}
+          className="h-20 w-20 object-cover rounded-lg"
+        />
+      </Link>
       <div className="flex-1 min-w-0">
-        {/* Category */}
-        <Link to={`/news?category=${categorySlug}`} className="text-xs text-[#4B6BFB] font-medium hover:underline">
-          {category}
+        <Link to={`/news/${news.id}`} className="block">
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+            {news.title}
+          </h4>
         </Link>
-
-        {/* Title */}
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-[#4B6BFB] transition-colors">
-          <Link to={`/news/${id}`}>{title}</Link>
-        </h4>
-
-        {/* Date */}
-        <div className="flex items-center text-xs text-gray-500 mt-1">
-          <Calendar className="w-3 h-3 mr-1" />
-          {formattedDate}
+        <div className="mt-1 flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-2">
+          <div className="flex items-center">
+            <Calendar className="h-3 w-3 mr-1" />
+            <span>{getTimeAgo(news.createdAt)}</span>
+          </div>
+          <div className="flex items-center">
+            <Eye className="h-3 w-3 mr-1" />
+            <span>{news.viewCount || 0}</span>
+          </div>
+          {news.rating && (
+            <div className="flex items-center">
+              <Star className="h-3 w-3 text-yellow-500 mr-1" />
+              <span>{news.rating.toFixed(1)}</span>
+            </div>
+          )}
+        </div>
+        <div className="mt-1 text-xs">
+          <Link
+            to={`/editor/${news.author?.id}`}
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+          >
+            {news.author?.name || "Anonim"}
+          </Link>
         </div>
       </div>
     </div>
