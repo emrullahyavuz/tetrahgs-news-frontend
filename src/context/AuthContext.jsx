@@ -18,41 +18,34 @@ export const AuthProvider = ({ children }) => {
   // Kullanıcı oturumunu kontrol et
   useEffect(() => {
     const checkAuth = async () => {
-      debugger
-      
-
       if (!token) {
         setLoading(false);
         return;
       }
-      if (token) {
-        localStorage.setItem("token", token);
-      }
 
       try {
-        const response = await getCurrentUser(token);
+        const response = await getCurrentUser();
         setUser(response.user);
-        
       } catch (err) {
         console.error("Auth check error:", err);
         localStorage.removeItem("token");
+        setToken("");
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [token]);
 
   // Giriş yap
   const login = async (email, password) => {
     try {
       setError(null);
-      debugger;
       const response = await loginUser(email, password);
 
-      
       localStorage.setItem("token", response.token);
+      setToken(response.token);
       setUser(response.user);
 
       return response;
@@ -65,6 +58,7 @@ export const AuthProvider = ({ children }) => {
   // Çıkış yap
   const logout = () => {
     localStorage.removeItem("token");
+    setToken("");
     setUser(null);
   };
 
@@ -75,6 +69,7 @@ export const AuthProvider = ({ children }) => {
       const response = await registerUser(userData);
 
       localStorage.setItem("token", response.token);
+      setToken(response.token);
       setUser(response.user);
 
       return response;

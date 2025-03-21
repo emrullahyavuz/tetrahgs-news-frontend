@@ -35,7 +35,7 @@ api.interceptors.response.use(
       // Token geçersiz veya süresi dolmuş
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     }
     return Promise.reject(error);
   }
